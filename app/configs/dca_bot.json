@@ -1,0 +1,6 @@
+{
+    "name": "DCA Bot",
+    "symbol": "BTCUSDT",
+    "enabled": false,
+    "dca_levels": [25000, 24000, 23000]
+}

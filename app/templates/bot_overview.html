@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Overview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client/dist/socket.io.js"></script>
+</head>
+<body class="container mt-4">
+    
+    <!-- Navigation Menu -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Trading Bot</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/bot_overview">Bot Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/index">Trading</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <h1 class="text-center">Bot Overview</h1>
+
+    <!-- Bot Summary -->
+    <div class="card p-3 mb-3">
+        <h2>Bot Summary</h2>
+        <p><strong>Total Bots:</strong> <span id="totalBots">0</span></p>
+        <p><strong>Simple Bots:</strong> <span id="simpleBots">0</span></p>
+        <p><strong>DCA Bots:</strong> <span id="dcaBots">0</span></p>
+    </div>
+
+    <!-- Add Bot Section -->
+    <div class="card p-3 mb-3">
+        <h2>Add a Bot</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <select id="botTypeSelect" class="form-select"></select>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-success" onclick="openBotConfig()">Add Bot</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bot Status Table -->
+    <div class="card p-3 mb-3">
+        <h2>Bot Status</h2>
+        <table class="table table-bordered" id="botStatusTable">
+            <thead>
+                <tr><th>Bot Name</th><th>Enabled</th><th>Open Orders</th><th>Open Positions</th><th>Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const socket = io();
+
+        function loadAvailableBots() {
+            fetch('/available_bots')
+                .then(res => res.json())
+                .then(data => {
+                    const botDropdown = document.getElementById('botTypeSelect');
+                    botDropdown.innerHTML = data.map(bot => 
+                        `<option value="${bot.type}">${bot.name}</option>`
+                    ).join('');
+                })
+                .catch(error => console.error("Error loading bots:", error));
+        }
+
+        function updateOverview() {
+            fetch('/bot_overview_data').then(res => res.json()).then(data => {
+                document.getElementById('totalBots').textContent = data.total_bots;
+                document.getElementById('simpleBots').textContent = data.simple_bots;
+                document.getElementById('dcaBots').textContent = data.dca_bots;
+                
+                const botTable = document.getElementById('botStatusTable').querySelector('tbody');
+                botTable.innerHTML = data.bots.map(bot => 
+                    `<tr>
+                        <td>${bot.name}</td>
+                        <td><button class='btn btn-sm ${bot.enabled ? "btn-success" : "btn-secondary"}' onclick='toggleBot("${bot.name}")'>${bot.enabled ? "Enabled" : "Disabled"}</button></td>
+                        <td>${bot.open_orders}</td>
+                        <td>${bot.open_positions}</td>
+                        <td>
+                            <button class='btn btn-warning btn-sm' onclick='editBot("${bot.name}")'>✏️ Edit</button>
+                            <button class='btn btn-danger btn-sm' onclick='deleteBot("${bot.name}")'>🗑️ Delete</button>
+                        </td>
+                    </tr>`).join('');
+            });
+        }
+
+        socket.on('update', updateOverview);
+        document.addEventListener("DOMContentLoaded", () => {
+            loadAvailableBots();
+            updateOverview();
+        });
+    </script>
+</body>
+</html>
