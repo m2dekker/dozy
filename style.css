@@ -12,7 +12,7 @@ body {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: #e0e0e0;
     min-height: 100vh;
-    padding: 20px;
+    padding: 15px;
 }
 
 .container {
@@ -25,15 +25,15 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 20px;
+    margin-bottom: 12px;
+    padding: 12px 20px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     backdrop-filter: blur(10px);
 }
 
 header h1 {
-    font-size: 28px;
+    font-size: 24px;
     color: #4a9eff;
     font-weight: 600;
 }
@@ -55,10 +55,10 @@ header h1 {
 /* Account Panel */
 .account-panel {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-    padding: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px 15px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     backdrop-filter: blur(10px);
@@ -98,10 +98,10 @@ header h1 {
 /* Chart Container */
 #chart-container {
     width: 100%;
-    height: 500px;
+    height: 350px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -109,40 +109,40 @@ header h1 {
 /* Control Panel */
 .control-panel {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
 .control-group {
-    padding: 20px;
+    padding: 15px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     backdrop-filter: blur(10px);
 }
 
 .control-group h3 {
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #8a8a8a;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
 /* Button Styles */
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .btn {
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -263,26 +263,26 @@ header h1 {
 
 /* Statistics Panel */
 .stats-panel {
-    padding: 20px;
+    padding: 15px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     backdrop-filter: blur(10px);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .stats-panel h3 {
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #8a8a8a;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
 }
 
 .stat-item {
