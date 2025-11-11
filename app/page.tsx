@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Clone, CloneFormData, JournalEntry } from '@/lib/types';
 import { hoursToRealMs, daysToRealMs, getCurrentMoment, getNextUpdateTime } from '@/lib/time';
-import { saveClone, getClones, updateCloneStatus, deleteClone, saveJournalEntry, generateId, updateCloneJournalTime, clearJournalForClone } from '@/lib/storage';
+import { saveClone, getClones, updateCloneStatus, deleteClone, saveJournalEntry, generateId, updateCloneJournalTime, clearJournalForClone, updateCloneTotalSpend } from '@/lib/storage';
 import CloneForm from '@/components/CloneForm';
 import CloneList from '@/components/CloneList';
 
@@ -60,7 +60,8 @@ export default function Home() {
       departure_time: now,
       arrival_time: now + travelDuration,
       activity_end_time: now + travelDuration + activityDuration,
-      created_at: now
+      created_at: now,
+      total_spend: 0
     };
 
     await saveClone(clone);
@@ -75,11 +76,21 @@ export default function Home() {
     }
   }
 
+  async function handleDismissClone(id: string) {
+    if (confirm('Dismiss this clone? They will stop generating updates.')) {
+      await updateCloneStatus(id, 'dismissed');
+      await loadClones();
+    }
+  }
+
   async function checkCloneStatuses() {
     const now = Date.now();
     let needsReload = false;
 
     for (const clone of clones) {
+      // Skip dismissed clones
+      if (clone.status === 'dismissed') continue;
+
       // Check if traveling clone has arrived
       if (clone.status === 'traveling' && now >= clone.arrival_time) {
         await updateCloneStatus(clone.id, 'active');
@@ -95,6 +106,7 @@ export default function Home() {
       // Check if active clone has finished
       if (clone.status === 'active' && now >= clone.activity_end_time) {
         await updateCloneStatus(clone.id, 'finished');
+        await generateTripSummary(clone);
         needsReload = true;
       }
     }
@@ -120,7 +132,8 @@ export default function Home() {
           activityDurationDays: clone.activity_duration_days,
           preferences: clone.preferences,
           budget: clone.budget,
-          moment: 'arrival'
+          moment: 'arrival',
+          isSummary: false
         })
       });
 
@@ -133,14 +146,17 @@ export default function Home() {
           destination: clone.destination,
           moment: 'arrival',
           message: data.message,
+          cost: data.cost || 0,
           timestamp: Date.now(),
           created_at: Date.now()
         };
 
-        await saveJournalEntry(entry);
-
-        // Update the clone's last journal time to prevent duplicates
-        await updateCloneJournalTime(clone.id, Date.now());
+        const saved = await saveJournalEntry(entry);
+        if (saved) {
+          // Update the clone's last journal time and total spend
+          await updateCloneJournalTime(clone.id, Date.now());
+          await updateCloneTotalSpend(clone.id, entry.cost);
+        }
       }
     } catch (error) {
       console.error('Failed to generate arrival update:', error);
@@ -184,7 +200,8 @@ export default function Home() {
           activityDurationDays: clone.activity_duration_days,
           preferences: clone.preferences,
           budget: clone.budget,
-          moment
+          moment,
+          isSummary: false
         })
       });
 
@@ -197,14 +214,17 @@ export default function Home() {
           destination: clone.destination,
           moment,
           message: data.message,
+          cost: data.cost || 0,
           timestamp: now,
           created_at: now
         };
 
-        await saveJournalEntry(entry);
-
-        // Update the clone's last journal time to prevent duplicates
-        await updateCloneJournalTime(clone.id, now);
+        const saved = await saveJournalEntry(entry);
+        if (saved) {
+          // Update the clone's last journal time and total spend
+          await updateCloneJournalTime(clone.id, now);
+          await updateCloneTotalSpend(clone.id, entry.cost);
+        }
       }
     } catch (error) {
       console.error('Failed to generate journal update:', error);
@@ -217,7 +237,53 @@ export default function Home() {
     }
   }
 
-  const activeClones = clones.filter(c => c.status !== 'finished');
+  async function generateTripSummary(clone: Clone) {
+    if (isGenerating.has(clone.id)) return;
+
+    setIsGenerating(prev => new Set(prev).add(clone.id));
+
+    try {
+      const response = await fetch('/api/generate-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cloneName: clone.name,
+          destination: clone.destination,
+          activityDurationDays: clone.activity_duration_days,
+          budget: clone.budget,
+          isSummary: true
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const entry: JournalEntry = {
+          id: generateId(),
+          clone_id: clone.id,
+          clone_name: clone.name,
+          destination: clone.destination,
+          moment: 'evening', // Use evening for summary
+          message: `Trip Summary: ${data.message}`,
+          cost: 0, // No additional cost for summary
+          timestamp: Date.now(),
+          created_at: Date.now()
+        };
+
+        await saveJournalEntry(entry);
+        await updateCloneJournalTime(clone.id, Date.now());
+      }
+    } catch (error) {
+      console.error('Failed to generate trip summary:', error);
+    } finally {
+      setIsGenerating(prev => {
+        const next = new Set(prev);
+        next.delete(clone.id);
+        return next;
+      });
+    }
+  }
+
+  const activeClones = clones.filter(c => c.status !== 'finished' && c.status !== 'dismissed');
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-5xl">
@@ -226,7 +292,7 @@ export default function Home() {
           CloneWander
         </h1>
         <p className="text-lg text-gray-700">
-          Send AI clones on adventures • Get personalized recommendations • Experience parallel lives
+          Send AI clones on adventures • Get personalized recommendations • Track expenses • Experience parallel lives
         </p>
       </header>
 
@@ -239,6 +305,7 @@ export default function Home() {
         clones={clones}
         currentTime={currentTime}
         onDelete={handleDeleteClone}
+        onDismiss={handleDismissClone}
       />
     </main>
   );

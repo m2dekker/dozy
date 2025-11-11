@@ -8,9 +8,10 @@ interface CloneListProps {
   clones: Clone[];
   currentTime: number;
   onDelete: (id: string) => void;
+  onDismiss: (id: string) => void;
 }
 
-export default function CloneList({ clones, currentTime, onDelete }: CloneListProps) {
+export default function CloneList({ clones, currentTime, onDelete, onDismiss }: CloneListProps) {
   const router = useRouter();
 
   if (clones.length === 0) {
@@ -48,15 +49,25 @@ export default function CloneList({ clones, currentTime, onDelete }: CloneListPr
                 <h3 className="text-lg font-bold text-gray-800">{clone.name}</h3>
                 <p className="text-gray-600">📍 {clone.destination}</p>
               </div>
-              <button
-                onClick={() => onDelete(clone.id)}
-                className="text-red-500 hover:text-red-700 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"
-              >
-                🗑️ Delete
-              </button>
+              <div className="flex gap-2">
+                {(clone.status === 'active' || clone.status === 'traveling') && (
+                  <button
+                    onClick={() => onDismiss(clone.id)}
+                    className="text-orange-500 hover:text-orange-700 text-sm font-medium hover:bg-orange-50 px-3 py-1 rounded transition-colors"
+                  >
+                    ⏸️ Dismiss
+                  </button>
+                )}
+                <button
+                  onClick={() => onDelete(clone.id)}
+                  className="text-red-500 hover:text-red-700 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"
+                >
+                  🗑️ Delete
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(clone.status)}`}>
                 {status.label}
               </span>
@@ -65,10 +76,15 @@ export default function CloneList({ clones, currentTime, onDelete }: CloneListPr
                   {status.timeRemaining}
                 </span>
               )}
+              {clone.total_spend > 0 && (
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  💰 ${clone.total_spend.toFixed(0)} spent
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-3">
-              <div>💰 Budget: <span className="font-medium">{clone.budget}</span></div>
+              <div>💰 Budget: <span className="font-medium capitalize">{clone.budget}</span></div>
               <div>⏱️ Duration: <span className="font-medium">{clone.activity_duration_days} days</span></div>
               {clone.preferences && (
                 <div className="col-span-2">
@@ -81,6 +97,22 @@ export default function CloneList({ clones, currentTime, onDelete }: CloneListPr
               <div className="mt-3 bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
                 <p className="text-sm text-blue-800">
                   ✍️ Journaling in progress... Check the journal for updates!
+                </p>
+              </div>
+            )}
+
+            {clone.status === 'dismissed' && (
+              <div className="mt-3 bg-orange-50 border-l-4 border-orange-500 p-3 rounded">
+                <p className="text-sm text-orange-800">
+                  ⏸️ This clone has been dismissed. No new updates will be generated.
+                </p>
+              </div>
+            )}
+
+            {clone.status === 'finished' && clone.total_spend > 0 && (
+              <div className="mt-3 bg-green-50 border-l-4 border-green-500 p-3 rounded">
+                <p className="text-sm text-green-800">
+                  ✅ Trip complete! Total estimated spend: ${clone.total_spend.toFixed(2)}
                 </p>
               </div>
             )}
@@ -108,6 +140,13 @@ function getCloneStatus(clone: Clone, currentTime: number) {
     };
   }
 
+  if (clone.status === 'dismissed') {
+    return {
+      label: '⏸️ Dismissed',
+      timeRemaining: null
+    };
+  }
+
   return {
     label: '✅ Finished',
     timeRemaining: null
@@ -120,6 +159,8 @@ function getStatusColor(status: Clone['status']): string {
       return 'bg-yellow-100 text-yellow-800';
     case 'active':
       return 'bg-green-100 text-green-800';
+    case 'dismissed':
+      return 'bg-orange-100 text-orange-800';
     case 'finished':
       return 'bg-gray-100 text-gray-800';
     default:

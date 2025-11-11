@@ -2,7 +2,7 @@
 
 export type Budget = 'budget' | 'medium' | 'high' | 'luxury';
 
-export type CloneStatus = 'traveling' | 'active' | 'finished';
+export type CloneStatus = 'traveling' | 'active' | 'finished' | 'dismissed';
 
 export type JournalMoment = 'arrival' | 'mid-day' | 'evening';
 
@@ -20,6 +20,7 @@ export interface Clone {
   activity_end_time: number; // Unix timestamp
   created_at: number; // Unix timestamp
   last_journal_update?: number; // Unix timestamp of last journal entry
+  total_spend: number; // Total estimated expenses in local currency
 }
 
 export interface JournalEntry {
@@ -29,6 +30,7 @@ export interface JournalEntry {
   destination: string;
   moment: JournalMoment;
   message: string;
+  cost: number; // Estimated cost for this activity
   timestamp: number; // Unix timestamp
   created_at: number; // Unix timestamp
 }

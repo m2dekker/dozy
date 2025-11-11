@@ -71,6 +71,32 @@ export async function updateCloneJournalTime(id: string, timestamp: number): Pro
   }
 }
 
+export async function updateCloneTotalSpend(id: string, additionalCost: number): Promise<void> {
+  if (useSupabase() && supabase) {
+    // Get current clone to add to total
+    const { data } = await supabase
+      .from('clones')
+      .select('total_spend')
+      .eq('id', id)
+      .single();
+
+    const currentSpend = data?.total_spend || 0;
+    const newTotal = currentSpend + additionalCost;
+
+    const { error } = await supabase
+      .from('clones')
+      .update({ total_spend: newTotal })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase error, falling back to localStorage:', error);
+      updateCloneTotalSpendInLocalStorage(id, additionalCost);
+    }
+  } else {
+    updateCloneTotalSpendInLocalStorage(id, additionalCost);
+  }
+}
+
 export async function deleteClone(id: string): Promise<void> {
   if (useSupabase() && supabase) {
     const { error } = await supabase
@@ -91,7 +117,14 @@ export async function deleteClone(id: string): Promise<void> {
 // JOURNAL ENTRY STORAGE
 // ============================================
 
-export async function saveJournalEntry(entry: JournalEntry): Promise<void> {
+export async function saveJournalEntry(entry: JournalEntry): Promise<boolean> {
+  // Check for duplicates first
+  const isDuplicate = await checkDuplicateEntry(entry.clone_id, entry.moment, entry.timestamp);
+  if (isDuplicate) {
+    console.log('Duplicate entry detected, skipping save');
+    return false;
+  }
+
   if (useSupabase() && supabase) {
     const { error } = await supabase
       .from('journal_entries')
@@ -104,6 +137,19 @@ export async function saveJournalEntry(entry: JournalEntry): Promise<void> {
   } else {
     saveJournalEntryToLocalStorage(entry);
   }
+
+  return true;
+}
+
+async function checkDuplicateEntry(cloneId: string, moment: string, timestamp: number): Promise<boolean> {
+  const entries = await getJournalEntriesForClone(cloneId);
+
+  // Check if there's an entry with same moment within 5 minutes
+  const fiveMinutes = 5 * 60 * 1000;
+  return entries.some(e =>
+    e.moment === moment &&
+    Math.abs(e.timestamp - timestamp) < fiveMinutes
+  );
 }
 
 export async function getJournalEntries(): Promise<JournalEntry[]> {
@@ -207,6 +253,16 @@ function updateCloneJournalTimeInLocalStorage(id: string, timestamp: number): vo
 
   if (clone) {
     clone.last_journal_update = timestamp;
+    localStorage.setItem('clonewander_clones', JSON.stringify(clones));
+  }
+}
+
+function updateCloneTotalSpendInLocalStorage(id: string, additionalCost: number): void {
+  const clones = getClonesFromLocalStorage();
+  const clone = clones.find(c => c.id === id);
+
+  if (clone) {
+    clone.total_spend = (clone.total_spend || 0) + additionalCost;
     localStorage.setItem('clonewander_clones', JSON.stringify(clones));
   }
 }

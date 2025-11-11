@@ -1,14 +1,16 @@
 # CloneWander - Context & Documentation
 
 ## App Purpose
-CloneWander lets users send AI clones to destinations worldwide, set travel and activity times (accelerated 10x for testing), and receive personalized activity recommendations based on their preferences and budget. The app simulates a parallel life experience where clones journal their adventures in real-time.
+CloneWander lets users send AI clones to destinations worldwide, set travel and activity times (accelerated 10x for testing), and receive personalized activity recommendations with expense tracking based on their preferences and budget. Users can dismiss clones to stop updates, and view deduplicated journals simulating a parallel life experience where clones journal their adventures in real-time.
 
 ## Features
 - **Clone Creation**: Create up to 5 AI clones with custom destinations
 - **Time Acceleration**: 10x faster time (12-hour travel = 72 minutes real-time, 3-day activity = 7.2 hours)
 - **Personalized Recommendations**: Budget-aware suggestions (budget/medium/high/luxury)
 - **Preference-Based Content**: Tailor experiences to user interests (food, art, nature, etc.)
-- **Real-Time Journal**: Clones generate 2-3 updates daily during activity period
+- **Real-Time Journal**: Clones generate 2-3 updates daily during activity period with deduplication
+- **Expense Tracking**: Each journal update includes estimated costs, with running totals per clone and trip summaries
+- **Dismiss Clone**: Stop clone updates without deleting the clone or journal history
 - **Status Tracking**: Live updates on clone travel/activity progress
 - **Persistent Storage**: Supabase database with localStorage fallback
 
@@ -31,10 +33,12 @@ travel_time_hours: integer
 activity_duration_days: integer
 preferences: text
 budget: text (budget, medium, high, luxury)
-status: text (traveling, active, finished)
+status: text (traveling, active, finished, dismissed)
 departure_time: timestamp
 arrival_time: timestamp
 activity_end_time: timestamp
+last_journal_update: timestamp
+total_spend: numeric (default 0)
 created_at: timestamp
 ```
 
@@ -46,6 +50,7 @@ clone_name: text
 destination: text
 moment: text (arrival, mid-day, evening)
 message: text
+cost: numeric (default 0)
 timestamp: timestamp
 created_at: timestamp
 ```
@@ -57,12 +62,14 @@ created_at: timestamp
 - **Update Frequency**: Every 2-4 hours (accelerated) = every 12-24 minutes real-time
 
 ## AI Prompt Strategy
-Clones generate vivid, specific recommendations using Claude API:
-- Include real venue names, specific activities, and personal details
+Clones generate vivid, first-person journal entries using Claude API:
+- Written in first person as if the clone is living a parallel life (not "as a clone")
+- Include specific real venue names with estimated costs
 - Match budget level (e.g., street food for budget, Michelin stars for luxury)
 - Incorporate user preferences naturally
-- Add relatable moments (spilled coffee, got lost, etc.)
-- Avoid generic advice—specificity creates authenticity
+- Add relatable personal moments (spilled coffee, got lost, made a friend, etc.)
+- Avoid travel guide language—write spontaneously and authentically
+- Generate trip summaries at activity end with total estimated expenses
 
 ## Future Enhancements (Not Implemented)
 - Integration with Google Places API for real venue data
@@ -71,9 +78,18 @@ Clones generate vivid, specific recommendations using Claude API:
 - Social sharing of clone journals
 - Clone personality customization
 - Weather data integration
-- Budget tracking and spending summaries
 
 ## Update Log
+
+### 2025-11-11: Expense Tracking, Dismiss Feature & AI Improvements
+- **Expense Tracking**: Added cost estimation to each journal update based on budget level
+- **Total Spend Tracking**: Display running totals per clone and trip summaries with estimated expenses
+- **Dismiss Clone Feature**: Added dismiss button to stop updates without deleting clone or journal
+- **Duplicate Prevention**: Implemented time-based deduplication (5-minute windows) to prevent duplicate entries
+- **AI Prompt Improvements**: Rewrote Claude prompts for authentic first-person parallel life experience
+- **Trip Summaries**: Automatic generation of trip summaries when activity ends
+- **Database Schema Updates**: Added `total_spend` to clones, `cost` to journal entries, `dismissed` status
+- **UI Enhancements**: Added expense badges, dismiss status indicators, and cost displays throughout app
 
 ### 2025-11-11: Initial Build
 - Created core CloneWander app with full functionality
