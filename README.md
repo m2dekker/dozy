@@ -14,13 +14,25 @@ Send your AI clone on adventures around the world! This Next.js app simulates tr
 - 📱 Fully responsive mobile-friendly design
 - ✨ Beautiful animations and modern UI
 
-### CloneSync Social Hub (NEW!)
+### CloneSync Social Hub
 - 🎭 Virtual chatroom where arrived clones interact
 - 💬 AI-generated group dialogues based on travel experiences
 - 🎤 Optional voice snippets (ElevenLabs API integration)
 - 🔗 Shareable invite links for friend's clones
 - 🌟 Dynamic emoji avatars per destination
 - 📊 Real-time clone statistics
+
+### CloneScout Travel Planner (NEW!)
+- 🗺️ AI-powered holiday itinerary generator
+- 📍 Google Places API integration for real attractions
+- 📅 Day-by-day detailed schedules with times and tips
+- 🎙️ Voice-narrated trip summaries
+- 🖼️ Visual placeholders (Stable Diffusion ready)
+- 📄 PDF export of complete itineraries
+- 🔗 Shareable plan URLs
+- 💡 Smart suggestions based on preferences (food, culture, adventure, etc.)
+- 🔍 Active scout tracking (max 3 simultaneous)
+- 💾 Plan history and resume support
 
 ## Setup Instructions
 
@@ -54,14 +66,23 @@ XAI_API_KEY=your_grok_api_key_here
 
 Get your key from: https://x.ai/
 
-**Optional - for Voice Features (Hub):**
+**Optional - for Voice Features (Hub & Planner):**
 ```
 ELEVENLABS_API_KEY=your_elevenlabs_key_here
 ```
 
 Get your key from: https://elevenlabs.io/
 
-**Note:** Voice features are optional. The hub will work without ElevenLabs, just without audio playback.
+**Optional - for Travel Planner (Real Attraction Data):**
+```
+GOOGLE_API_KEY=your_google_api_key_here
+```
+
+Get your key from: https://console.cloud.google.com/
+
+Enable: Places API, Geocoding API
+
+**Note:** Voice and Google Places features are optional. The planner will use fallback data if Google API is not configured.
 
 ### 3. Run Development Server
 
@@ -95,6 +116,23 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 The hub will generate witty group conversations where clones share stories, compare experiences, and banter about their adventures!
 
+### 6. Plan Your Holiday with CloneScout
+
+1. **Click "Travel Planner"** from the main page
+2. **Enter destination** (e.g., "Bali", "Phuket", "Barcelona")
+3. **Set trip length** (1-14 days)
+4. **Select preferences** (food, culture, adventure, etc.)
+5. **Dispatch scout** - AI generates your itinerary!
+6. **View Holiday Blueprint** with:
+   - Day-by-day schedule with specific times
+   - Activity descriptions and pro tips
+   - Voice summary (if ElevenLabs configured)
+   - Visual placeholders for destinations
+7. **Download PDF** of your complete itinerary
+8. **Share plan** via unique URL with friends
+
+The planner creates detailed, personalized itineraries using AI and real attraction data (if Google Places API is configured).
+
 ## Deploy to Vercel
 
 ### Option 1: Deploy via CLI
@@ -111,9 +149,9 @@ vercel
 3. Click "New Project"
 4. Import your GitHub repository
 5. Add environment variables in Vercel dashboard:
-   - Key: `ANTHROPIC_API_KEY`
-   - Value: Your actual API key
-   - Optional: `ELEVENLABS_API_KEY` for voice features
+   - **Required**: `ANTHROPIC_API_KEY` (for all AI features)
+   - **Optional**: `ELEVENLABS_API_KEY` (for voice narration)
+   - **Optional**: `GOOGLE_API_KEY` (for travel planner real data)
 6. Click "Deploy"
 
 ### Option 3: Deploy Button

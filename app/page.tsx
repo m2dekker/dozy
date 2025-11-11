@@ -197,14 +197,17 @@ export default function Home() {
         <h1>{t.title}</h1>
         <p className="subtitle">{t.subtitle}</p>
 
-        {/* Hub Link */}
-        {arrivedClones.length > 0 && (
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        {/* Navigation Links */}
+        <div style={{ textAlign: 'center', marginBottom: '20px', display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <a href="/plan" className="btn-planner-link">
+            🗺️ Travel Planner
+          </a>
+          {arrivedClones.length > 0 && (
             <a href="/hub" className="btn-hub-link">
-              🌐 Visit CloneSync Hub ({arrivedClones.length} clones waiting)
+              🌐 Social Hub ({arrivedClones.length})
             </a>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Send Clone Form */}
         <form onSubmit={handleSendClone} className="form">
