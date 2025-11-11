@@ -24,6 +24,7 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   padding: 40px;
   animation: slideIn 0.5s ease-out;
+  position: relative;
 }
 
 @keyframes slideIn {
@@ -35,6 +36,31 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Language Toggle */
+.language-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.btn-language {
+  background: white;
+  border: 2px solid #667eea;
+  color: #667eea;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-language:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
 }
 
 h1 {

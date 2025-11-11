@@ -11,6 +11,7 @@ import {
   removeClone,
   CloneData
 } from '@/lib/travel';
+import { Language, getTranslations, saveLanguage, getLanguage } from '@/lib/translations';
 
 export default function Home() {
   const [cloneName, setCloneName] = useState('');
@@ -20,12 +21,17 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string>('');
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+  const [language, setLanguage] = useState<Language>('en');
   const pollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Load clones from localStorage on mount
+  const t = getTranslations(language);
+
+  // Load clones and language from localStorage on mount
   useEffect(() => {
     const stored = getClones();
     setClones(stored);
+    const savedLang = getLanguage();
+    setLanguage(savedLang);
   }, []);
 
   // Polling effect - check all clones every 10 seconds
@@ -116,12 +122,12 @@ export default function Home() {
     e.preventDefault();
 
     if (!cloneName.trim()) {
-      setError('Please enter a clone name');
+      setError(t.errorCloneName);
       return;
     }
 
     if (!destination.trim()) {
-      setError('Please enter a destination');
+      setError(t.errorDestination);
       return;
     }
 
@@ -159,37 +165,60 @@ export default function Home() {
     setSelectedClone(null);
   };
 
+  const handleLanguageToggle = () => {
+    const newLang: Language = language === 'en' ? 'th' : 'en';
+    setLanguage(newLang);
+    saveLanguage(newLang);
+  };
+
+  const getCategoryLabel = (category: string): string => {
+    switch (category) {
+      case 'local': return t.local;
+      case 'regional': return t.regional;
+      case 'international': return t.international;
+      case 'intercontinental': return t.intercontinental;
+      default: return category;
+    }
+  };
+
   const activeClones = clones.filter(c => !c.hasArrived);
   const arrivedClones = clones.filter(c => c.hasArrived);
 
   return (
     <main className="container">
       <div className="card">
-        <h1>🛫 AI Clone Traveler</h1>
-        <p className="subtitle">Create and send AI clones on adventures around the world</p>
+        {/* Language Toggle */}
+        <div className="language-toggle">
+          <button onClick={handleLanguageToggle} className="btn-language">
+            {language === 'en' ? '🇹🇭 ไทย' : '🇬🇧 English'}
+          </button>
+        </div>
+
+        <h1>{t.title}</h1>
+        <p className="subtitle">{t.subtitle}</p>
 
         {/* Send Clone Form */}
         <form onSubmit={handleSendClone} className="form">
           <div className="input-group">
-            <label htmlFor="cloneName">Clone Name</label>
+            <label htmlFor="cloneName">{t.cloneNameLabel}</label>
             <input
               id="cloneName"
               type="text"
               value={cloneName}
               onChange={(e) => setCloneName(e.target.value)}
-              placeholder="e.g., Explorer Mike, Travel Sarah..."
+              placeholder={t.cloneNamePlaceholder}
               className="input"
             />
           </div>
 
           <div className="input-group">
-            <label htmlFor="destination">Destination</label>
+            <label htmlFor="destination">{t.destinationLabel}</label>
             <input
               id="destination"
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder="e.g., Thailand, Paris, Tokyo..."
+              placeholder={t.destinationPlaceholder}
               className="input"
             />
           </div>
@@ -197,14 +226,14 @@ export default function Home() {
           {error && <div className="error">{error}</div>}
 
           <button type="submit" className="btn btn-primary">
-            Send Clone 🚀
+            {t.sendCloneButton}
           </button>
         </form>
 
         {/* Active Clones Section */}
         {activeClones.length > 0 && (
           <div className="clones-section">
-            <h2 className="section-title">✈️ Traveling Clones ({activeClones.length})</h2>
+            <h2 className="section-title">{t.travelingClones} ({activeClones.length})</h2>
             <div className="clones-grid">
               {activeClones.map((clone) => {
                 const timeRemaining = clone.arrivalTime - Date.now();
@@ -216,13 +245,13 @@ export default function Home() {
                   <div key={clone.id} className="clone-card">
                     <div className="clone-header">
                       <div className="clone-name">{clone.name}</div>
-                      <div className="clone-category">{clone.category}</div>
+                      <div className="clone-category">{getCategoryLabel(clone.category)}</div>
                     </div>
 
                     <div className="clone-destination">📍 {clone.destination}</div>
 
                     <div className="time-remaining-small">
-                      <div className="time-label">Arrives in</div>
+                      <div className="time-label">{t.arrivesIn}</div>
                       <div className="time-value-small">
                         {formatTimeRemaining(timeRemaining)}
                       </div>
@@ -239,7 +268,7 @@ export default function Home() {
                       onClick={() => handleCancelClone(clone.id)}
                       className="btn btn-small btn-secondary"
                     >
-                      Cancel
+                      {t.cancel}
                     </button>
                   </div>
                 );
@@ -251,13 +280,13 @@ export default function Home() {
         {/* Arrived Clones Section */}
         {arrivedClones.length > 0 && (
           <div className="clones-section">
-            <h2 className="section-title">🎉 Arrived Clones ({arrivedClones.length})</h2>
+            <h2 className="section-title">{t.arrivedClones} ({arrivedClones.length})</h2>
             <div className="clones-grid">
               {arrivedClones.map((clone) => (
                 <div key={clone.id} className="clone-card arrived">
                   <div className="clone-header">
                     <div className="clone-name">{clone.name}</div>
-                    <div className="clone-status">✓ Arrived</div>
+                    <div className="clone-status">{t.arrived}</div>
                   </div>
 
                   <div className="clone-destination">📍 {clone.destination}</div>
@@ -267,13 +296,13 @@ export default function Home() {
                       onClick={() => handleViewMessage(clone)}
                       className="btn btn-small btn-primary"
                     >
-                      View Message
+                      {t.viewMessage}
                     </button>
                     <button
                       onClick={() => handleDismissClone(clone)}
                       className="btn btn-small btn-secondary"
                     >
-                      Dismiss
+                      {t.dismiss}
                     </button>
                   </div>
                 </div>
@@ -285,13 +314,13 @@ export default function Home() {
         {/* Empty State */}
         {clones.length === 0 && (
           <div className="info-box">
-            <p><strong>💡 How it works:</strong></p>
+            <p><strong>{t.howItWorks}</strong></p>
             <ul>
-              <li>Give your clone a name</li>
-              <li>Choose a destination</li>
-              <li>Your clone will travel there (simulated time)</li>
-              <li>Get a unique AI-generated arrival message</li>
-              <li>Create multiple clones and send them everywhere!</li>
+              <li>{t.step1}</li>
+              <li>{t.step2}</li>
+              <li>{t.step3}</li>
+              <li>{t.step4}</li>
+              <li>{t.step5}</li>
             </ul>
           </div>
         )}
@@ -302,7 +331,7 @@ export default function Home() {
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🎉 {selectedClone.name} Arrived!</h2>
+              <h2>🎉 {selectedClone.name} {t.arrivedTitle}</h2>
             </div>
             <div className="modal-body">
               <div className="arrival-destination">
@@ -314,13 +343,13 @@ export default function Home() {
             </div>
             <div className="modal-footer">
               <button onClick={handleCloseModal} className="btn btn-primary">
-                Close
+                {t.close}
               </button>
               <button
                 onClick={() => handleDismissClone(selectedClone)}
                 className="btn btn-secondary"
               >
-                Dismiss Clone
+                {t.dismissClone}
               </button>
             </div>
           </div>
@@ -328,7 +357,7 @@ export default function Home() {
       )}
 
       <footer className="footer">
-        <p>Powered by Claude AI • Travel times simulated for demo</p>
+        <p>{t.footer}</p>
       </footer>
     </main>
   );
