@@ -4,93 +4,121 @@ import { useState, useEffect, useRef } from 'react';
 import {
   estimateTravelTime,
   formatTimeRemaining,
-  saveClone,
-  getActiveClone,
-  clearClone,
+  createClone,
+  addClone,
+  getClones,
+  updateClone,
+  removeClone,
   CloneData
 } from '@/lib/travel';
 
 export default function Home() {
+  const [cloneName, setCloneName] = useState('');
   const [destination, setDestination] = useState('');
-  const [activeClone, setActiveClone] = useState<CloneData | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<number>(0);
-  const [arrivalMessage, setArrivalMessage] = useState<string>('');
+  const [clones, setClones] = useState<CloneData[]>([]);
+  const [selectedClone, setSelectedClone] = useState<CloneData | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string>('');
+  const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const pollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Load clone from localStorage on mount
+  // Load clones from localStorage on mount
   useEffect(() => {
-    const stored = getActiveClone();
-    if (stored) {
-      setActiveClone(stored);
-      checkArrival(stored);
-    }
+    const stored = getClones();
+    setClones(stored);
   }, []);
 
-  // Polling effect - check every 10 seconds
+  // Polling effect - check all clones every 10 seconds
   useEffect(() => {
-    if (activeClone && !showModal) {
-      // Update time remaining every second for smooth countdown
-      const updateInterval = setInterval(() => {
-        const remaining = activeClone.arrivalTime - Date.now();
-        setTimeRemaining(remaining);
-      }, 1000);
+    // Update time remaining every second for smooth countdown
+    const updateInterval = setInterval(() => {
+      setClones(prevClones => [...prevClones]); // Force re-render
+    }, 1000);
 
-      // Check for arrival every 10 seconds
-      pollingInterval.current = setInterval(() => {
-        checkArrival(activeClone);
-      }, 10000);
+    // Check for arrivals every 10 seconds
+    pollingInterval.current = setInterval(() => {
+      checkArrivals();
+    }, 10000);
 
-      return () => {
-        clearInterval(updateInterval);
-        if (pollingInterval.current) {
-          clearInterval(pollingInterval.current);
-        }
-      };
-    }
-  }, [activeClone, showModal]);
+    // Check immediately on mount
+    checkArrivals();
 
-  const checkArrival = async (clone: CloneData) => {
-    const now = Date.now();
-    if (now >= clone.arrivalTime && !isGenerating) {
-      // Clone has arrived!
-      setIsGenerating(true);
-      setError('');
-
-      try {
-        const response = await fetch('/api/generate-message', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            destination: clone.destination
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to generate message');
-        }
-
-        setArrivalMessage(data.message);
-        setShowModal(true);
-      } catch (err: any) {
-        console.error('Error:', err);
-        setError(err.message || 'Failed to generate arrival message');
-        setArrivalMessage(`Your clone has arrived in ${clone.destination}! (But couldn't generate a witty message - check your API key)`);
-        setShowModal(true);
-      } finally {
-        setIsGenerating(false);
+    return () => {
+      clearInterval(updateInterval);
+      if (pollingInterval.current) {
+        clearInterval(pollingInterval.current);
       }
+    };
+  }, [clones.length]);
+
+  const checkArrivals = async () => {
+    const currentClones = getClones();
+    const now = Date.now();
+
+    for (const clone of currentClones) {
+      if (!clone.hasArrived && now >= clone.arrivalTime && !generatingFor) {
+        // Clone has arrived!
+        await handleCloneArrival(clone);
+      }
+    }
+  };
+
+  const handleCloneArrival = async (clone: CloneData) => {
+    setGeneratingFor(clone.id);
+    setError('');
+
+    try {
+      const response = await fetch('/api/generate-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          destination: clone.destination,
+          cloneName: clone.name
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate message');
+      }
+
+      // Update clone with arrival message
+      const updatedClones = updateClone(clone.id, {
+        arrivalMessage: data.message,
+        hasArrived: true
+      });
+
+      setClones(updatedClones);
+      setSelectedClone({ ...clone, arrivalMessage: data.message, hasArrived: true });
+      setShowModal(true);
+    } catch (err: any) {
+      console.error('Error:', err);
+      const fallbackMessage = `${clone.name} has arrived in ${clone.destination}! (Couldn't generate witty message - check API)`;
+
+      const updatedClones = updateClone(clone.id, {
+        arrivalMessage: fallbackMessage,
+        hasArrived: true
+      });
+
+      setClones(updatedClones);
+      setSelectedClone({ ...clone, arrivalMessage: fallbackMessage, hasArrived: true });
+      setShowModal(true);
+      setError(err.message || 'Failed to generate arrival message');
+    } finally {
+      setGeneratingFor(null);
     }
   };
 
   const handleSendClone = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!cloneName.trim()) {
+      setError('Please enter a clone name');
+      return;
+    }
 
     if (!destination.trim()) {
       setError('Please enter a destination');
@@ -99,122 +127,200 @@ export default function Home() {
 
     setError('');
     const estimate = estimateTravelTime(destination);
-    const clone = saveClone(destination, estimate.hours, estimate.category);
+    const newClone = createClone(cloneName.trim(), destination.trim(), estimate.hours, estimate.category);
 
-    setActiveClone(clone);
-    setTimeRemaining(clone.arrivalTime - Date.now());
+    const updatedClones = addClone(newClone);
+    setClones(updatedClones);
+    setCloneName('');
     setDestination('');
+  };
+
+  const handleCancelClone = (id: string) => {
+    if (confirm('Are you sure you want to cancel this clone\'s journey?')) {
+      const updatedClones = removeClone(id);
+      setClones(updatedClones);
+    }
+  };
+
+  const handleViewMessage = (clone: CloneData) => {
+    setSelectedClone(clone);
+    setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    clearClone();
-    setActiveClone(null);
-    setArrivalMessage('');
+    setSelectedClone(null);
   };
 
-  const handleCancelClone = () => {
-    if (confirm('Are you sure you want to cancel this clone\'s journey?')) {
-      clearClone();
-      setActiveClone(null);
-      setTimeRemaining(0);
-    }
+  const handleDismissClone = (clone: CloneData) => {
+    const updatedClones = removeClone(clone.id);
+    setClones(updatedClones);
+    setShowModal(false);
+    setSelectedClone(null);
   };
+
+  const activeClones = clones.filter(c => !c.hasArrived);
+  const arrivedClones = clones.filter(c => c.hasArrived);
 
   return (
     <main className="container">
       <div className="card">
         <h1>🛫 AI Clone Traveler</h1>
-        <p className="subtitle">Send your AI clone on an adventure anywhere in the world</p>
+        <p className="subtitle">Create and send AI clones on adventures around the world</p>
 
-        {!activeClone ? (
-          <form onSubmit={handleSendClone} className="form">
-            <div className="input-group">
-              <label htmlFor="destination">Where should your clone travel?</label>
-              <input
-                id="destination"
-                type="text"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="e.g., Thailand, Paris, Tokyo..."
-                className="input"
-              />
+        {/* Send Clone Form */}
+        <form onSubmit={handleSendClone} className="form">
+          <div className="input-group">
+            <label htmlFor="cloneName">Clone Name</label>
+            <input
+              id="cloneName"
+              type="text"
+              value={cloneName}
+              onChange={(e) => setCloneName(e.target.value)}
+              placeholder="e.g., Explorer Mike, Travel Sarah..."
+              className="input"
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="destination">Destination</label>
+            <input
+              id="destination"
+              type="text"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="e.g., Thailand, Paris, Tokyo..."
+              className="input"
+            />
+          </div>
+
+          {error && <div className="error">{error}</div>}
+
+          <button type="submit" className="btn btn-primary">
+            Send Clone 🚀
+          </button>
+        </form>
+
+        {/* Active Clones Section */}
+        {activeClones.length > 0 && (
+          <div className="clones-section">
+            <h2 className="section-title">✈️ Traveling Clones ({activeClones.length})</h2>
+            <div className="clones-grid">
+              {activeClones.map((clone) => {
+                const timeRemaining = clone.arrivalTime - Date.now();
+                const progress = Math.max(0, Math.min(100,
+                  ((Date.now() - clone.departureTime) / (clone.arrivalTime - clone.departureTime)) * 100
+                ));
+
+                return (
+                  <div key={clone.id} className="clone-card">
+                    <div className="clone-header">
+                      <div className="clone-name">{clone.name}</div>
+                      <div className="clone-category">{clone.category}</div>
+                    </div>
+
+                    <div className="clone-destination">📍 {clone.destination}</div>
+
+                    <div className="time-remaining-small">
+                      <div className="time-label">Arrives in</div>
+                      <div className="time-value-small">
+                        {formatTimeRemaining(timeRemaining)}
+                      </div>
+                    </div>
+
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => handleCancelClone(clone.id)}
+                      className="btn btn-small btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        )}
 
-            {error && <div className="error">{error}</div>}
+        {/* Arrived Clones Section */}
+        {arrivedClones.length > 0 && (
+          <div className="clones-section">
+            <h2 className="section-title">🎉 Arrived Clones ({arrivedClones.length})</h2>
+            <div className="clones-grid">
+              {arrivedClones.map((clone) => (
+                <div key={clone.id} className="clone-card arrived">
+                  <div className="clone-header">
+                    <div className="clone-name">{clone.name}</div>
+                    <div className="clone-status">✓ Arrived</div>
+                  </div>
 
-            <button type="submit" className="btn btn-primary">
-              Send Clone 🚀
-            </button>
+                  <div className="clone-destination">📍 {clone.destination}</div>
 
-            <div className="info-box">
-              <p><strong>💡 How it works:</strong></p>
-              <ul>
-                <li>Enter a destination</li>
-                <li>Your clone will travel there (simulated time)</li>
-                <li>When arrived, get a witty AI-generated arrival message</li>
-                <li>Each message is unique and fun!</li>
-              </ul>
-            </div>
-          </form>
-        ) : (
-          <div className="status-container">
-            <div className="status-card">
-              <div className="status-icon">✈️</div>
-              <h2>Clone En Route</h2>
-              <div className="destination-name">{activeClone.destination}</div>
-
-              <div className="time-remaining">
-                <div className="time-label">Arrival in</div>
-                <div className="time-value">
-                  {formatTimeRemaining(timeRemaining)}
+                  <div className="clone-actions">
+                    <button
+                      onClick={() => handleViewMessage(clone)}
+                      className="btn btn-small btn-primary"
+                    >
+                      View Message
+                    </button>
+                    <button
+                      onClick={() => handleDismissClone(clone)}
+                      className="btn btn-small btn-secondary"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{
-                    width: `${Math.max(0, Math.min(100, ((Date.now() - activeClone.departureTime) / (activeClone.arrivalTime - activeClone.departureTime)) * 100))}%`
-                  }}
-                />
-              </div>
-
-              <p className="status-message">
-                {timeRemaining > 0
-                  ? 'Your clone is traveling... We\'ll notify you upon arrival!'
-                  : isGenerating
-                  ? 'Generating arrival message...'
-                  : 'Arrived! Generating message...'}
-              </p>
-
-              <button onClick={handleCancelClone} className="btn btn-secondary">
-                Cancel Journey
-              </button>
+              ))}
             </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {clones.length === 0 && (
+          <div className="info-box">
+            <p><strong>💡 How it works:</strong></p>
+            <ul>
+              <li>Give your clone a name</li>
+              <li>Choose a destination</li>
+              <li>Your clone will travel there (simulated time)</li>
+              <li>Get a unique AI-generated arrival message</li>
+              <li>Create multiple clones and send them everywhere!</li>
+            </ul>
           </div>
         )}
       </div>
 
       {/* Arrival Modal */}
-      {showModal && (
+      {showModal && selectedClone && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🎉 Clone Arrived!</h2>
+              <h2>🎉 {selectedClone.name} Arrived!</h2>
             </div>
             <div className="modal-body">
               <div className="arrival-destination">
-                📍 {activeClone?.destination}
+                📍 {selectedClone.destination}
               </div>
               <div className="arrival-message">
-                {arrivalMessage}
+                {selectedClone.arrivalMessage}
               </div>
-              {error && <div className="error">{error}</div>}
             </div>
             <div className="modal-footer">
               <button onClick={handleCloseModal} className="btn btn-primary">
-                Start New Journey
+                Close
+              </button>
+              <button
+                onClick={() => handleDismissClone(selectedClone)}
+                className="btn btn-secondary"
+              >
+                Dismiss Clone
               </button>
             </div>
           </div>
@@ -222,7 +328,7 @@ export default function Home() {
       )}
 
       <footer className="footer">
-        <p>Powered by Claude AI • Travel times are simulated for demo purposes</p>
+        <p>Powered by Claude AI • Travel times simulated for demo</p>
       </footer>
     </main>
   );

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // This API route keeps your API key secret on the server side
 export async function POST(request: NextRequest) {
   try {
-    const { destination } = await request.json();
+    const { destination, cloneName } = await request.json();
 
     if (!destination) {
       return NextResponse.json(
@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
 
     // Try Anthropic Claude API first
     if (anthropicKey) {
-      message = await generateWithClaude(destination, anthropicKey);
+      message = await generateWithClaude(destination, cloneName || 'Your clone', anthropicKey);
     }
     // Fallback to xAI Grok if configured
     else if (xaiKey) {
-      message = await generateWithGrok(destination, xaiKey);
+      message = await generateWithGrok(destination, cloneName || 'Your clone', xaiKey);
     }
 
     return NextResponse.json({ message });
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Generate message using Anthropic Claude API
-async function generateWithClaude(destination: string, apiKey: string): Promise<string> {
+async function generateWithClaude(destination: string, cloneName: string, apiKey: string): Promise<string> {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -60,7 +60,7 @@ async function generateWithClaude(destination: string, apiKey: string): Promise<
       temperature: 1.0, // High temperature for variability
       messages: [{
         role: 'user',
-        content: `You are a witty AI clone of the user who just arrived in ${destination}. Generate a short, fun arrival message (2-3 sentences max) that includes:
+        content: `You are ${cloneName}, a witty AI clone who just arrived in ${destination}. Generate a short, fun arrival message (2-3 sentences max) that includes:
 - Your arrival in ${destination}
 - Something random/emergent like being hungry, tired, excited, or noticing local culture
 - A fun, Grok-like witty tone with personality
@@ -81,7 +81,7 @@ Keep it casual, variable, and entertaining. Each message should feel unique and 
 }
 
 // Generate message using xAI Grok API (placeholder - adjust based on actual API)
-async function generateWithGrok(destination: string, apiKey: string): Promise<string> {
+async function generateWithGrok(destination: string, cloneName: string, apiKey: string): Promise<string> {
   // Note: This is a placeholder. xAI API details may differ.
   // Update the endpoint and format when xAI API becomes available
   const response = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -94,7 +94,7 @@ async function generateWithGrok(destination: string, apiKey: string): Promise<st
       model: 'grok-1',
       messages: [{
         role: 'user',
-        content: `You are a witty AI clone who just arrived in ${destination}. Generate a short, fun arrival message (2-3 sentences) that includes something random like hunger or local activities. Keep it casual and entertaining with a question at the end.`
+        content: `You are ${cloneName}, a witty AI clone who just arrived in ${destination}. Generate a short, fun arrival message (2-3 sentences) that includes something random like hunger or local activities. Keep it casual and entertaining with a question at the end.`
       }],
       temperature: 1.0
     })

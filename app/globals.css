@@ -8,16 +8,14 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 20px;
   color: #333;
 }
 
 .container {
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .card {
@@ -57,6 +55,9 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding-bottom: 30px;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 30px;
 }
 
 .input-group {
@@ -113,11 +114,16 @@ label {
 .btn-secondary {
   background: #f5f5f5;
   color: #666;
-  margin-top: 15px;
 }
 
 .btn-secondary:hover {
   background: #e0e0e0;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 14px;
+  margin: 0;
 }
 
 .error {
@@ -134,7 +140,6 @@ label {
   padding: 20px;
   border-radius: 10px;
   border: 2px solid #e8eaff;
-  margin-top: 10px;
 }
 
 .info-box p {
@@ -160,58 +165,105 @@ label {
   margin-right: 8px;
 }
 
-.status-container {
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.status-card {
-  text-align: center;
-  width: 100%;
-}
-
-.status-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.status-card h2 {
-  font-size: 28px;
-  color: #667eea;
-  margin-bottom: 10px;
-}
-
-.destination-name {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
+/* Clones Section */
+.clones-section {
   margin-bottom: 30px;
 }
 
-.time-remaining {
+.section-title {
+  font-size: 22px;
+  color: #667eea;
   margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.clones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.clone-card {
+  background: #f8f9ff;
+  border: 2px solid #e8eaff;
+  border-radius: 15px;
+  padding: 20px;
+  transition: all 0.3s;
+  animation: fadeIn 0.5s;
+}
+
+.clone-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+}
+
+.clone-card.arrived {
+  background: #f0fff4;
+  border-color: #c6f6d5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.clone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.clone-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.clone-category {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #999;
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.clone-status {
+  font-size: 12px;
+  color: #38a169;
+  background: #c6f6d5;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.clone-destination {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.time-remaining-small {
+  margin-bottom: 12px;
 }
 
 .time-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #999;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-.time-value {
-  font-size: 36px;
+.time-value-small {
+  font-size: 20px;
   font-weight: 700;
   color: #667eea;
   font-variant-numeric: tabular-nums;
@@ -219,11 +271,11 @@ label {
 
 .progress-bar {
   width: 100%;
-  height: 8px;
-  background: #f0f0f0;
+  height: 6px;
+  background: #e0e0e0;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .progress-fill {
@@ -233,12 +285,18 @@ label {
   border-radius: 10px;
 }
 
-.status-message {
-  color: #666;
-  margin-bottom: 20px;
-  font-size: 15px;
+.clone-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
+.clone-actions button {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -251,10 +309,10 @@ label {
   justify-content: center;
   z-index: 1000;
   padding: 20px;
-  animation: fadeIn 0.3s;
+  animation: fadeInOverlay 0.3s;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInOverlay {
   from {
     opacity: 0;
   }
@@ -324,7 +382,15 @@ label {
 
 .modal-footer {
   padding: 20px 30px 30px;
-  text-align: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-footer button {
+  flex: 1;
+  min-width: 120px;
 }
 
 .footer {
@@ -334,7 +400,8 @@ label {
   font-size: 14px;
 }
 
-@media (max-width: 600px) {
+/* Responsive */
+@media (max-width: 768px) {
   .card {
     padding: 30px 20px;
   }
@@ -343,11 +410,25 @@ label {
     font-size: 26px;
   }
 
-  .time-value {
-    font-size: 28px;
+  .clones-grid {
+    grid-template-columns: 1fr;
   }
 
   .modal-content {
     margin: 20px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 15px;
   }
 }

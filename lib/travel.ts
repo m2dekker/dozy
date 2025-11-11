@@ -84,42 +84,89 @@ export function formatTimeRemaining(milliseconds: number): string {
 }
 
 export interface CloneData {
+  id: string;
+  name: string;
   destination: string;
   departureTime: number;
   arrivalTime: number;
   category: string;
+  arrivalMessage?: string;
+  hasArrived?: boolean;
 }
 
-export function saveClone(destination: string, travelHours: number, category: string): CloneData {
+function generateCloneId(): string {
+  return `clone_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+export function createClone(name: string, destination: string, travelHours: number, category: string): CloneData {
   const departureTime = Date.now();
   const arrivalTime = departureTime + (travelHours * 60 * 60 * 1000);
 
-  const cloneData: CloneData = {
+  return {
+    id: generateCloneId(),
+    name,
     destination,
     departureTime,
     arrivalTime,
-    category
+    category,
+    hasArrived: false
   };
-
-  localStorage.setItem('activeClone', JSON.stringify(cloneData));
-  return cloneData;
 }
 
-export function getActiveClone(): CloneData | null {
-  if (typeof window === 'undefined') return null;
+export function saveClones(clones: CloneData[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('clones', JSON.stringify(clones));
+  }
+}
 
-  const stored = localStorage.getItem('activeClone');
-  if (!stored) return null;
+export function getClones(): CloneData[] {
+  if (typeof window === 'undefined') return [];
+
+  const stored = localStorage.getItem('clones');
+  if (!stored) return [];
 
   try {
     return JSON.parse(stored);
   } catch {
-    return null;
+    return [];
   }
 }
 
-export function clearClone(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('activeClone');
+export function addClone(clone: CloneData): CloneData[] {
+  const clones = getClones();
+  clones.push(clone);
+  saveClones(clones);
+  return clones;
+}
+
+export function updateClone(id: string, updates: Partial<CloneData>): CloneData[] {
+  const clones = getClones();
+  const index = clones.findIndex(c => c.id === id);
+
+  if (index !== -1) {
+    clones[index] = { ...clones[index], ...updates };
+    saveClones(clones);
   }
+
+  return clones;
+}
+
+export function removeClone(id: string): CloneData[] {
+  const clones = getClones().filter(c => c.id !== id);
+  saveClones(clones);
+  return clones;
+}
+
+export function clearAllClones(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('clones');
+  }
+}
+
+export function getActiveClones(): CloneData[] {
+  return getClones().filter(clone => !clone.hasArrived);
+}
+
+export function getArrivedClones(): CloneData[] {
+  return getClones().filter(clone => clone.hasArrived);
 }
