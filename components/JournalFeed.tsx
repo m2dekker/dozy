@@ -1,0 +1,93 @@
+'use client';
+
+import { JournalEntry } from '@/lib/types';
+import { formatTimestamp } from '@/lib/time';
+
+interface JournalFeedProps {
+  entries: JournalEntry[];
+  onClearClone?: (cloneId: string, cloneName: string) => void;
+}
+
+export default function JournalFeed({ entries, onClearClone }: JournalFeedProps) {
+  if (entries.length === 0) {
+    return (
+      <div className="bg-gray-50 rounded-lg p-12 text-center">
+        <div className="text-6xl mb-4">📔</div>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">No Journal Entries Yet</h3>
+        <p className="text-gray-600">
+          Send a clone on a journey and they'll start documenting their experiences!
+        </p>
+      </div>
+    );
+  }
+
+  // Group entries by clone
+  const cloneGroups = entries.reduce((acc, entry) => {
+    if (!acc[entry.clone_id]) {
+      acc[entry.clone_id] = {
+        cloneName: entry.clone_name,
+        destination: entry.destination,
+        entries: []
+      };
+    }
+    acc[entry.clone_id].entries.push(entry);
+    return acc;
+  }, {} as Record<string, { cloneName: string; destination: string; entries: JournalEntry[] }>);
+
+  return (
+    <div className="space-y-8">
+      {Object.entries(cloneGroups).map(([cloneId, group]) => (
+        <div key={cloneId} className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">{group.cloneName}</h3>
+              <p className="text-gray-600">📍 {group.destination}</p>
+              <p className="text-sm text-gray-500 mt-1">{group.entries.length} entries</p>
+            </div>
+            {onClearClone && (
+              <button
+                onClick={() => onClearClone(cloneId, group.cloneName)}
+                className="text-red-500 hover:text-red-700 text-sm font-medium"
+              >
+                🗑️ Clear Journal
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {group.entries.map((entry) => (
+              <div
+                key={entry.id}
+                className="border-l-4 border-purple-500 pl-4 py-2 hover:bg-purple-50 transition-colors rounded-r"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{getMomentEmoji(entry.moment)}</span>
+                  <span className="font-semibold text-gray-800 capitalize">
+                    {entry.moment.replace('-', ' ')}
+                  </span>
+                  <span className="text-sm text-gray-500 ml-auto">
+                    {formatTimestamp(entry.timestamp)}
+                  </span>
+                </div>
+                <p className="text-gray-700 leading-relaxed">{entry.message}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function getMomentEmoji(moment: string): string {
+  switch (moment) {
+    case 'arrival':
+      return '✈️';
+    case 'mid-day':
+      return '☀️';
+    case 'evening':
+      return '🌙';
+    default:
+      return '📝';
+  }
+}
