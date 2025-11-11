@@ -19,6 +19,7 @@ export interface Clone {
   arrival_time: number; // Unix timestamp
   activity_end_time: number; // Unix timestamp
   created_at: number; // Unix timestamp
+  last_journal_update?: number; // Unix timestamp of last journal entry
 }
 
 export interface JournalEntry {

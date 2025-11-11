@@ -48,16 +48,12 @@ export default function CloneList({ clones, currentTime, onDelete }: CloneListPr
                 <h3 className="text-lg font-bold text-gray-800">{clone.name}</h3>
                 <p className="text-gray-600">📍 {clone.destination}</p>
               </div>
-              <div className="flex gap-2">
-                {clone.status === 'finished' && (
-                  <button
-                    onClick={() => onDelete(clone.id)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    🗑️ Delete
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={() => onDelete(clone.id)}
+                className="text-red-500 hover:text-red-700 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition-colors"
+              >
+                🗑️ Delete
+              </button>
             </div>
 
             <div className="flex items-center gap-2 mb-2">

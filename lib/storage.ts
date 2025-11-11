@@ -55,6 +55,22 @@ export async function updateCloneStatus(id: string, status: Clone['status']): Pr
   }
 }
 
+export async function updateCloneJournalTime(id: string, timestamp: number): Promise<void> {
+  if (useSupabase() && supabase) {
+    const { error } = await supabase
+      .from('clones')
+      .update({ last_journal_update: timestamp })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase error, falling back to localStorage:', error);
+      updateCloneJournalTimeInLocalStorage(id, timestamp);
+    }
+  } else {
+    updateCloneJournalTimeInLocalStorage(id, timestamp);
+  }
+}
+
 export async function deleteClone(id: string): Promise<void> {
   if (useSupabase() && supabase) {
     const { error } = await supabase
@@ -181,6 +197,16 @@ function updateCloneStatusInLocalStorage(id: string, status: Clone['status']): v
 
   if (clone) {
     clone.status = status;
+    localStorage.setItem('clonewander_clones', JSON.stringify(clones));
+  }
+}
+
+function updateCloneJournalTimeInLocalStorage(id: string, timestamp: number): void {
+  const clones = getClonesFromLocalStorage();
+  const clone = clones.find(c => c.id === id);
+
+  if (clone) {
+    clone.last_journal_update = timestamp;
     localStorage.setItem('clonewander_clones', JSON.stringify(clones));
   }
 }

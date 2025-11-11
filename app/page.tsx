@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Clone, CloneFormData, JournalEntry } from '@/lib/types';
 import { hoursToRealMs, daysToRealMs, getCurrentMoment, getNextUpdateTime } from '@/lib/time';
-import { saveClone, getClones, updateCloneStatus, deleteClone, saveJournalEntry, generateId } from '@/lib/storage';
+import { saveClone, getClones, updateCloneStatus, deleteClone, saveJournalEntry, generateId, updateCloneJournalTime, clearJournalForClone } from '@/lib/storage';
 import CloneForm from '@/components/CloneForm';
 import CloneList from '@/components/CloneList';
 
@@ -11,7 +11,6 @@ export default function Home() {
   const [clones, setClones] = useState<Clone[]>([]);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [isGenerating, setIsGenerating] = useState<Set<string>>(new Set());
-  const lastUpdateCheck = useRef<Record<string, number>>({});
 
   // Load clones on mount
   useEffect(() => {
@@ -70,6 +69,7 @@ export default function Home() {
 
   async function handleDeleteClone(id: string) {
     if (confirm('Delete this clone? This will also clear their journal.')) {
+      await clearJournalForClone(id);
       await deleteClone(id);
       await loadClones();
     }
@@ -138,7 +138,9 @@ export default function Home() {
         };
 
         await saveJournalEntry(entry);
-        lastUpdateCheck.current[clone.id] = Date.now();
+
+        // Update the clone's last journal time to prevent duplicates
+        await updateCloneJournalTime(clone.id, Date.now());
       }
     } catch (error) {
       console.error('Failed to generate arrival update:', error);
@@ -154,9 +156,11 @@ export default function Home() {
   async function checkForJournalUpdate(clone: Clone, now: number) {
     if (isGenerating.has(clone.id)) return;
 
-    const lastCheck = lastUpdateCheck.current[clone.id] || clone.arrival_time;
-    const nextUpdate = getNextUpdateTime(lastCheck);
+    // Use last_journal_update from clone data, or arrival_time as fallback
+    const lastUpdate = clone.last_journal_update || clone.arrival_time;
+    const nextUpdate = getNextUpdateTime(lastUpdate);
 
+    // Only generate if enough time has passed
     if (now >= nextUpdate) {
       await generateJournalUpdate(clone, now);
     }
@@ -198,7 +202,9 @@ export default function Home() {
         };
 
         await saveJournalEntry(entry);
-        lastUpdateCheck.current[clone.id] = now;
+
+        // Update the clone's last journal time to prevent duplicates
+        await updateCloneJournalTime(clone.id, now);
       }
     } catch (error) {
       console.error('Failed to generate journal update:', error);
