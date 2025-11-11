@@ -4,12 +4,23 @@ Send your AI clone on adventures around the world! This Next.js app simulates tr
 
 ## Features
 
+### Main App
 - 🌍 Send your AI clone to any destination
+- 🏷️ Name your clones and create multiple simultaneously
 - ⏱️ Realistic travel time simulation based on distance
-- 🤖 AI-generated arrival messages (using Claude or Grok API)
+- 🤖 AI-generated arrival messages (using Claude API)
 - 💾 Persistent state (survives page refresh using localStorage)
+- 🌐 Bilingual support (English & Thai)
 - 📱 Fully responsive mobile-friendly design
 - ✨ Beautiful animations and modern UI
+
+### CloneSync Social Hub (NEW!)
+- 🎭 Virtual chatroom where arrived clones interact
+- 💬 AI-generated group dialogues based on travel experiences
+- 🎤 Optional voice snippets (ElevenLabs API integration)
+- 🔗 Shareable invite links for friend's clones
+- 🌟 Dynamic emoji avatars per destination
+- 📊 Real-time clone statistics
 
 ## Setup Instructions
 
@@ -43,6 +54,15 @@ XAI_API_KEY=your_grok_api_key_here
 
 Get your key from: https://x.ai/
 
+**Optional - for Voice Features (Hub):**
+```
+ELEVENLABS_API_KEY=your_elevenlabs_key_here
+```
+
+Get your key from: https://elevenlabs.io/
+
+**Note:** Voice features are optional. The hub will work without ElevenLabs, just without audio playback.
+
 ### 3. Run Development Server
 
 ```bash
@@ -64,6 +84,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - International: ~5 minutes
 - Intercontinental: ~9 minutes
 
+### 5. Try the CloneSync Hub
+
+1. **Send multiple clones** to different destinations
+2. **Wait for them to arrive** (or use test destinations for quick arrival)
+3. **Click "Visit CloneSync Hub"** button on main page
+4. **Generate group chat** to see your clones interact!
+5. **Optional**: Click "Invite Friend" to get a shareable link
+6. **Listen to voice** (if ElevenLabs is configured) for key funny lines
+
+The hub will generate witty group conversations where clones share stories, compare experiences, and banter about their adventures!
+
 ## Deploy to Vercel
 
 ### Option 1: Deploy via CLI
@@ -82,6 +113,7 @@ vercel
 5. Add environment variables in Vercel dashboard:
    - Key: `ANTHROPIC_API_KEY`
    - Value: Your actual API key
+   - Optional: `ELEVENLABS_API_KEY` for voice features
 6. Click "Deploy"
 
 ### Option 3: Deploy Button

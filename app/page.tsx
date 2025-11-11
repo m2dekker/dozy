@@ -197,6 +197,15 @@ export default function Home() {
         <h1>{t.title}</h1>
         <p className="subtitle">{t.subtitle}</p>
 
+        {/* Hub Link */}
+        {arrivedClones.length > 0 && (
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <a href="/hub" className="btn-hub-link">
+              🌐 Visit CloneSync Hub ({arrivedClones.length} clones waiting)
+            </a>
+          </div>
+        )}
+
         {/* Send Clone Form */}
         <form onSubmit={handleSendClone} className="form">
           <div className="input-group">
