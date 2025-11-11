@@ -1419,3 +1419,662 @@ label {
     width: 100%;
   }
 }
+
+/* ==========================================
+   JOURNAL PAGE STYLES
+   ========================================== */
+
+.journal-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 40px 20px;
+}
+
+.journal-header {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.journal-title-section {
+  flex: 1;
+}
+
+.journal-title-section h1 {
+  color: white;
+  font-size: 36px;
+  margin: 0 0 10px 0;
+}
+
+.journal-title-section p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.journal-controls {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  flex: 1;
+  min-width: 250px;
+}
+
+.control-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.clone-selector,
+.moment-filter {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  transition: border-color 0.3s;
+}
+
+.clone-selector:focus,
+.moment-filter:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn-journal-link {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+}
+
+.btn-journal-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+}
+
+/* ==========================================
+   BIO FORM STYLES
+   ========================================== */
+
+.bio-form-container {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+}
+
+.bio-display {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.bio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.bio-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.bio-text {
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 15px 0;
+}
+
+.bio-meta {
+  display: flex;
+  gap: 10px;
+}
+
+.ai-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bio-form {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.bio-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.bio-form-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.word-count {
+  float: right;
+  font-size: 14px;
+  color: #666;
+}
+
+.word-count .warning {
+  color: #ff6b6b;
+}
+
+.bio-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.3s;
+}
+
+.bio-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.help-text {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.model-selector {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+  margin-right: 10px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.radio-icon {
+  font-size: 24px;
+}
+
+.radio-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.radio-text strong {
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.radio-text small {
+  color: #888;
+  font-size: 12px;
+}
+
+.save-success {
+  margin-top: 15px;
+  padding: 12px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  color: #155724;
+  text-align: center;
+}
+
+/* ==========================================
+   JOURNAL FEED STYLES
+   ========================================== */
+
+.clone-journal-section {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.manual-generate-section {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.generate-info {
+  flex: 1;
+  text-align: center;
+  color: #666;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.no-clones-message {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 15px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.no-clones-message h3 {
+  color: #333;
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.no-clones-message p {
+  color: #666;
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.clones-summary {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.clones-summary h3 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.clones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.clone-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.clone-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clone-card-header h4 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.arrived {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.status-badge.traveling {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.clone-card-body {
+  flex: 1;
+}
+
+.clone-card-body .destination {
+  margin: 0 0 10px 0;
+  opacity: 0.9;
+}
+
+.clone-card-body .entry-stats {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.clone-card-body .warning-text {
+  color: #ffeb3b;
+  font-weight: 600;
+  margin: 0;
+}
+
+.clone-card-body .bio-preview {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.journal-feed-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.journal-feed-section h2 {
+  color: white;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.journal-empty {
+  background: white;
+  border-radius: 15px;
+  padding: 80px 40px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.journal-empty h3 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.journal-empty p {
+  color: #666;
+  font-size: 16px;
+}
+
+.journal-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.journal-entry {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.entry-header {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.entry-avatar {
+  font-size: 36px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.entry-meta {
+  flex: 1;
+}
+
+.entry-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+}
+
+.clone-name {
+  font-weight: 700;
+  color: #333;
+  font-size: 18px;
+}
+
+.moment-badge {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  color: #2d3436;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.entry-location {
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.entry-time {
+  color: #999;
+  font-size: 13px;
+}
+
+.entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-model-badge {
+  font-size: 20px;
+  cursor: help;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.btn-icon:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.delete-btn:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.entry-content {
+  margin: 15px 0;
+}
+
+.entry-message {
+  color: #333;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.entry-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.entry-timestamp {
+  color: #999;
+  font-size: 12px;
+}
+
+/* ==========================================
+   RESPONSIVE - JOURNAL
+   ========================================== */
+
+@media (max-width: 768px) {
+  .journal-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .journal-title-section h1 {
+    font-size: 28px;
+  }
+
+  .journal-controls {
+    flex-direction: column;
+  }
+
+  .control-group {
+    min-width: 100%;
+  }
+
+  .manual-generate-section {
+    flex-direction: column;
+  }
+
+  .clones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .entry-header {
+    flex-wrap: wrap;
+  }
+
+  .entry-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .model-selector {
+    flex-direction: column;
+  }
+
+  .radio-option {
+    min-width: 100%;
+  }
+}

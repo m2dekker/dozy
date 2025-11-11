@@ -199,6 +199,9 @@ export default function Home() {
 
         {/* Navigation Links */}
         <div style={{ textAlign: 'center', marginBottom: '20px', display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <a href="/journal" className="btn-journal-link">
+            📔 Journal
+          </a>
           <a href="/plan" className="btn-planner-link">
             🗺️ Travel Planner
           </a>
