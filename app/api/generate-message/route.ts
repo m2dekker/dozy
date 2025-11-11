@@ -55,7 +55,7 @@ async function generateWithClaude(destination: string, apiKey: string): Promise<
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-20240620',
       max_tokens: 200,
       temperature: 1.0, // High temperature for variability
       messages: [{
