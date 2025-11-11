@@ -23,7 +23,6 @@ export default function HubPage() {
   const [clones, setClones] = useState<CloneData[]>([]);
   const [dialogue, setDialogue] = useState<GroupDialogue | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
   const [error, setError] = useState('');
   const [shareUrl, setShareUrl] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -121,8 +120,7 @@ export default function HubPage() {
       setDialogue(newDialogue);
       saveDialogue(newDialogue);
 
-      // Generate voice for marked messages
-      await generateVoiceForMessages(messages);
+      // Voice generation removed - keeping text-based only
 
     } catch (err: any) {
       console.error('Error:', err);
@@ -130,53 +128,6 @@ export default function HubPage() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const generateVoiceForMessages = async (messages: DialogueMessage[]) => {
-    // Find messages marked for voice
-    const voiceMessages = messages.filter(m => (m as any).shouldHaveVoice);
-
-    if (voiceMessages.length === 0) return;
-
-    setIsGeneratingVoice(true);
-
-    // Generate voice for first 2 marked messages
-    const toGenerate = voiceMessages.slice(0, 2);
-
-    for (const msg of toGenerate) {
-      try {
-        const response = await fetch('/api/generate-voice', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: msg.message,
-            voiceId: null // Use default voice
-          }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.audioUrl) {
-          // Update message with audio URL
-          setDialogue(prev => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              messages: prev.messages.map(m =>
-                m.id === msg.id ? { ...m, audioUrl: data.audioUrl } : m
-              )
-            };
-          });
-        }
-      } catch (err) {
-        console.error('Failed to generate voice for message:', err);
-        // Continue with other messages
-      }
-    }
-
-    setIsGeneratingVoice(false);
   };
 
   const handleInviteFriend = () => {
@@ -288,12 +239,6 @@ export default function HubPage() {
                 <ChatMessage key={message.id} message={message} index={idx} />
               ))}
             </div>
-
-            {isGeneratingVoice && (
-              <div className="voice-status">
-                🎙️ Generating voice for key messages...
-              </div>
-            )}
 
             {/* Regenerate Button */}
             <div className="chat-footer">

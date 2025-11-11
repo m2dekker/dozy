@@ -34,7 +34,6 @@ export interface TravelPlan {
   scoutName: string;
   itinerary: DayItinerary[];
   summary: string;
-  voiceUrl?: string;
   imageUrls?: string[];
   createdAt: number;
   status: 'scouting' | 'ready' | 'failed';

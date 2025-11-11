@@ -33,7 +33,6 @@ export default function PlanPage() {
 
   const [currentPlan, setCurrentPlan] = useState<TravelPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
   const [error, setError] = useState('');
   const [savedPlans, setSavedPlans] = useState<TravelPlan[]>([]);
   const [activeScouts, setActiveScouts] = useState<any[]>([]);
@@ -127,9 +126,6 @@ export default function PlanPage() {
         status: 'ready'
       };
 
-      // Step 3: Generate voice (optional)
-      await generateVoiceForPlan(plan);
-
       // Save plan
       savePlan(plan);
       setCurrentPlan(plan);
@@ -144,33 +140,6 @@ export default function PlanPage() {
       setError(err.message || 'Failed to generate travel plan');
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const generateVoiceForPlan = async (plan: TravelPlan) => {
-    setIsGeneratingVoice(true);
-
-    try {
-      const response = await fetch('/api/generate-voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: plan.summary,
-          voiceId: null
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.audioUrl) {
-        plan.voiceUrl = data.audioUrl;
-        savePlan(plan);
-      }
-    } catch (err) {
-      console.error('Failed to generate voice:', err);
-      // Continue without voice
-    } finally {
-      setIsGeneratingVoice(false);
     }
   };
 
@@ -342,12 +311,6 @@ export default function PlanPage() {
               >
                 {isGenerating ? '🔍 Scouting...' : '🚀 Dispatch Scout'}
               </button>
-
-              {isGeneratingVoice && (
-                <div className="voice-status">
-                  🎙️ Generating voice narration...
-                </div>
-              )}
             </form>
 
             {/* Saved Plans */}

@@ -7,7 +7,6 @@ export interface DialogueMessage {
   destination: string;
   message: string;
   timestamp: number;
-  audioUrl?: string;
 }
 
 export interface GroupDialogue {

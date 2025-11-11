@@ -9,23 +9,11 @@ interface BlueprintProps {
 
 export default function Blueprint({ plan, onDownloadPDF }: BlueprintProps) {
   const [showShareModal, setShowShareModal] = useState(false);
-  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const shareUrl = createShareableUrl(plan.id);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
     alert('Link copied to clipboard!');
-  };
-
-  const handlePlayVoice = () => {
-    if (plan.voiceUrl) {
-      setIsPlayingVoice(true);
-      const audio = document.getElementById(`voice-${plan.id}`) as HTMLAudioElement;
-      if (audio) {
-        audio.play();
-        audio.onended = () => setIsPlayingVoice(false);
-      }
-    }
   };
 
   const prefs = formatPreferences(plan.preferences);
@@ -58,20 +46,6 @@ export default function Blueprint({ plan, onDownloadPDF }: BlueprintProps) {
       <div className="blueprint-summary">
         <h3>Scout's Summary</h3>
         <p>{plan.summary}</p>
-
-        {/* Voice Player */}
-        {plan.voiceUrl && (
-          <div className="voice-player">
-            <button
-              onClick={handlePlayVoice}
-              disabled={isPlayingVoice}
-              className="voice-play-btn"
-            >
-              {isPlayingVoice ? '🔊 Playing...' : '🎙️ Listen to Summary'}
-            </button>
-            <audio id={`voice-${plan.id}`} src={plan.voiceUrl} preload="none" />
-          </div>
-        )}
       </div>
 
       {/* Image Placeholders */}
