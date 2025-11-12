@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Budget, CloneFormData } from '@/lib/types';
+import { Budget, CloneFormData, AdventurePack, getPackDetails } from '@/lib/types';
 
 interface CloneFormProps {
   onSubmit: (data: CloneFormData) => void;
@@ -15,6 +15,9 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
   const [activityDurationDays, setActivityDurationDays] = useState(1);
   const [preferences, setPreferences] = useState('');
   const [budget, setBudget] = useState<Budget>('medium');
+  const [pack, setPack] = useState<AdventurePack>('standard');
+  const [isPremium, setIsPremium] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +43,14 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
     }
 
     onSubmit({
-      name: name.trim(),
+      name: 'Dart', // Always Dart
       destination: destination.trim(),
       travel_time_hours: travelTimeHours,
       activity_duration_days: activityDurationDays,
       preferences: preferences.trim(),
-      budget
+      budget,
+      pack,
+      isPremium
     });
 
     // Reset form
@@ -55,6 +60,8 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
     setActivityDurationDays(1);
     setPreferences('');
     setBudget('medium');
+    setPack('standard');
+    // Keep isPremium as is (doesn't reset)
   };
 
   return (
@@ -143,7 +150,7 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
         </p>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Budget Level
         </label>
@@ -158,6 +165,79 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
           <option value="luxury">👑 Luxury (Michelin stars, exclusive access)</option>
         </select>
       </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Adventure Pack
+        </label>
+        <select
+          value={pack}
+          onChange={(e) => {
+            const selectedPack = e.target.value as AdventurePack;
+            const packInfo = getPackDetails(selectedPack);
+            if (packInfo.isPremium && !isPremium) {
+              setShowPremiumModal(true);
+              return;
+            }
+            setPack(selectedPack);
+          }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="standard">🌍 Standard Explorer (Free)</option>
+          <option value="foodie-explorer" disabled={!isPremium}>🍕 Foodie Explorer {!isPremium && '(Premium)'}</option>
+          <option value="art-culture" disabled={!isPremium}>🎨 Art & Culture {!isPremium && '(Premium)'}</option>
+          <option value="night-owl" disabled={!isPremium}>🌙 Night Owl {!isPremium && '(Premium)'}</option>
+          <option value="budget-backpacker" disabled={!isPremium}>🎒 Budget Backpacker {!isPremium && '(Premium)'}</option>
+          <option value="luxury-escape" disabled={!isPremium}>💎 Luxury Escape {!isPremium && '(Premium)'}</option>
+          <option value="nature-seeker" disabled={!isPremium}>🌲 Nature Seeker {!isPremium && '(Premium)'}</option>
+        </select>
+        <p className="text-xs text-gray-500 mt-1">
+          {getPackDetails(pack).description}
+        </p>
+      </div>
+
+      <div className="mb-6">
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isPremium}
+            onChange={(e) => setIsPremium(e.target.checked)}
+            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+          />
+          <span className="ml-2 text-sm font-medium text-gray-700">
+            Premium Mode (Unlock all Adventure Packs & unlimited email journals)
+          </span>
+        </label>
+      </div>
+
+      {/* Premium Modal */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowPremiumModal(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">🔒 Premium Feature</h3>
+            <p className="text-gray-600 mb-4">
+              Adventure Packs are exclusive to Premium users. Enable Premium Mode to unlock all themed experiences!
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setIsPremium(true);
+                  setShowPremiumModal(false);
+                }}
+                className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700"
+              >
+                Enable Premium
+              </button>
+              <button
+                onClick={() => setShowPremiumModal(false)}
+                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-300"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <button
         type="submit"

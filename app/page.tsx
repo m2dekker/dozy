@@ -50,12 +50,14 @@ export default function Home() {
 
     const clone: Clone = {
       id: generateId(),
-      name: formData.name,
+      name: 'Dart', // All clones are named Dart
       destination: formData.destination,
       travel_time_hours: formData.travel_time_hours,
       activity_duration_days: formData.activity_duration_days,
       preferences: formData.preferences,
       budget: formData.budget,
+      pack: formData.pack,
+      isPremium: formData.isPremium,
       status: 'traveling',
       departure_time: now,
       arrival_time: now + travelDuration,
