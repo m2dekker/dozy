@@ -4,11 +4,21 @@
 CloneWander lets users send AI clones to destinations worldwide, set travel and activity times (accelerated 1600x for ultra-fast testing - complete journey in ~1 minute), and receive personalized activity recommendations with expense tracking. Clones behave like real travelers with time-appropriate activities (morning breakfast, afternoon sightseeing, evening dining) that adapt to weather conditions. Users can dismiss clones to stop updates and view deduplicated journals simulating a realistic parallel life experience.
 
 ## Features
-- **Clone Creation**: Create up to 5 AI clones with custom destinations
+- **Clone Creation**: Create up to 5 AI clones (all named "Dart") with custom destinations
 - **Ultra-Fast Testing**: 1600x acceleration (2-hour travel = ~4.5s, 1-day trip = ~54s real-time)
 - **Human-Like Daily Routines**: Clones behave like real travelers with time-appropriate activities
 - **Weather-Based Activities**: Activities adapt to current weather conditions (sunny = outdoor, rainy = museums)
 - **Time-of-Day Activities**: Morning breakfast/museums, afternoon lunch/parks, evening dinner/nightlife
+- **Adventure Packs**: 7 themed recommendation packs (1 free, 6 premium)
+  - Standard Explorer (free): Balanced mix for all travelers
+  - Foodie Explorer (premium): Culinary adventures, local markets, cooking experiences
+  - Art & Culture (premium): Museums, galleries, historical sites, cultural events
+  - Night Owl (premium): Nightlife, bars, clubs, evening entertainment
+  - Budget Backpacker (premium): Free attractions, street food, hostel culture
+  - Luxury Escape (premium): Michelin dining, 5-star experiences, exclusive venues
+  - Nature Seeker (premium): Parks, gardens, hiking, outdoor adventures
+- **Premium Mode**: Unlock all Adventure Packs and unlimited email journals
+- **Email Journal Entries**: Send journal entries to email (free: 1 entry, premium: unlimited)
 - **Personalized Recommendations**: Budget-aware suggestions (budget/medium/high/luxury)
 - **Preference-Based Content**: Tailor experiences to user interests (food, art, nature, etc.)
 - **Real-Time Journal**: Clones generate updates every 3-5 simulated hours with deduplication
@@ -30,19 +40,21 @@ CloneWander lets users send AI clones to destinations worldwide, set travel and 
 ### Clones Table
 ```sql
 id: uuid (primary key)
-name: text
+name: text (always 'Dart')
 destination: text
-travel_time_hours: integer
+travel_time_hours: numeric
 activity_duration_days: integer
 preferences: text
 budget: text (budget, medium, high, luxury)
+pack: text (standard, foodie-explorer, art-culture, night-owl, budget-backpacker, luxury-escape, nature-seeker)
+is_premium: boolean (default false)
 status: text (traveling, active, finished, dismissed)
-departure_time: timestamp
-arrival_time: timestamp
-activity_end_time: timestamp
-last_journal_update: timestamp
+departure_time: bigint
+arrival_time: bigint
+activity_end_time: bigint
+last_journal_update: bigint
 total_spend: numeric (default 0)
-created_at: timestamp
+created_at: bigint
 ```
 
 ### Journal Entries Table
@@ -86,6 +98,29 @@ Clones generate practical, human-like travel journal entries using Claude API:
 - Weather data integration
 
 ## Update Log
+
+### 2025-11-12: Adventure Packs & Email Journal Features
+- **Adventure Packs System**: Added 7 themed recommendation packs for personalized experiences
+  - Standard Explorer (free): Balanced mix suitable for all travelers
+  - Foodie Explorer (premium): Culinary adventures, local markets, cooking classes, specialty restaurants
+  - Art & Culture (premium): Museums, galleries, historical sites, theaters, cultural performances
+  - Night Owl (premium): Nightlife, bars, clubs, live music venues, late-night eateries
+  - Budget Backpacker (premium): Free attractions, street food, public parks, hostel culture
+  - Luxury Escape (premium): Michelin dining, 5-star hotels, private tours, exclusive experiences
+  - Nature Seeker (premium): Parks, gardens, hiking trails, outdoor activities, scenic viewpoints
+- **Premium Mode Toggle**: Enable premium to unlock all Adventure Packs and unlimited email journals
+- **Email Journal Entries**: SendGrid integration to email selected journal entries
+  - Free tier: Limited to 1 journal entry per email
+  - Premium tier: Unlimited entries per email
+  - Custom HTML email template with gradient design, trip summary, costs, and branding
+  - Entry selection UI with checkboxes and "Select All" functionality
+  - Email modal with address input and tier information
+- **Pack-Themed AI Prompts**: AI generates activities matching selected Adventure Pack theme
+  - Pack guidance layers on top of time-of-day, weather, and budget considerations
+  - Example: Foodie Explorer + rainy evening = indoor cooking class or cozy restaurant
+- **Clone Naming Convention**: All clones now named "Dart" by default
+- **Database Schema Updates**: Added `pack` and `is_premium` fields to clones table
+- **UI Enhancements**: Pack dropdown with premium lock, premium modal, email controls on journal page
 
 ### 2025-11-12: Human-Like Daily Routines & Ultra-Fast Testing
 - **1600x Acceleration**: Complete journey now takes ~1 minute (2h travel + 1 day = 59s)
