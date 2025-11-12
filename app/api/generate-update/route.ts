@@ -1,10 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import { Budget, JournalMoment } from '@/lib/types';
+import { Budget, JournalMoment, AdventurePack } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, isSummary, timeOfDay, weather } = await request.json();
+    const { cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, isSummary, timeOfDay, weather, pack } = await request.json();
 
     if (!cloneName || !destination) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Build context-aware prompt
     const prompt = isSummary
       ? buildSummaryPrompt(cloneName, destination, activityDurationDays, budget)
-      : buildPrompt(cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, timeOfDay, weather);
+      : buildPrompt(cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, timeOfDay, weather, pack || 'standard');
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
@@ -76,11 +76,13 @@ function buildPrompt(
   budget: Budget,
   moment: JournalMoment,
   timeOfDay?: any,
-  weather?: any
+  weather?: any,
+  pack?: AdventurePack
 ): string {
   // Budget-specific guidance
   const budgetGuidance = getBudgetGuidance(budget);
   const costRange = getCostRange(budget);
+  const packGuidance = getPackGuidance(pack || 'standard');
 
   // Time and weather context
   const hour = timeOfDay?.hour || 12;
@@ -109,6 +111,7 @@ Current situation:
 - Best for: ${activityType}
 - Your preferences: ${preferences || 'open to any experiences'}
 - ${budgetGuidance}
+- ${packGuidance}
 
 Write a brief journal update (2-3 sentences) like a human would spend their day.
 
@@ -212,6 +215,26 @@ function getMomentContext(moment: JournalMoment): string {
       return 'an evening activity, restaurant, or location. Include transport info and timing.';
     default:
       return 'your current activity';
+  }
+}
+
+function getPackGuidance(pack: AdventurePack): string {
+  switch (pack) {
+    case 'foodie-explorer':
+      return 'Adventure Pack: FOODIE EXPLORER - Prioritize culinary experiences: local markets, cooking classes, street food tours, specialty restaurants, food festivals, wine tastings';
+    case 'art-culture':
+      return 'Adventure Pack: ART & CULTURE - Focus on cultural experiences: museums, galleries, historical sites, theaters, cultural performances, architecture tours, local artisans';
+    case 'night-owl':
+      return 'Adventure Pack: NIGHT OWL - Emphasize nightlife and evening activities: bars, clubs, live music venues, night markets, late-night eateries, rooftop bars, evening events';
+    case 'budget-backpacker':
+      return 'Adventure Pack: BUDGET BACKPACKER - Focus on free/cheap activities: free walking tours, public parks, street art, local markets, hostels, cheap eats, hitchhiking culture';
+    case 'luxury-escape':
+      return 'Adventure Pack: LUXURY ESCAPE - Prioritize high-end experiences: Michelin restaurants, 5-star hotels, private tours, exclusive clubs, luxury shopping, spa treatments, premium transport';
+    case 'nature-seeker':
+      return 'Adventure Pack: NATURE SEEKER - Focus on outdoor/nature activities: parks, gardens, hiking trails, botanical gardens, beaches, nature reserves, outdoor sports, scenic viewpoints';
+    case 'standard':
+    default:
+      return 'Adventure Pack: STANDARD EXPLORER - Balanced mix of activities suitable for all travelers';
   }
 }
 

@@ -140,7 +140,8 @@ export default function Home() {
           moment: 'arrival',
           isSummary: false,
           timeOfDay: timeInfo,
-          weather: weather
+          weather: weather,
+          pack: clone.pack
         })
       });
 
@@ -212,7 +213,8 @@ export default function Home() {
           moment,
           isSummary: false,
           timeOfDay: timeInfo,
-          weather: weather
+          weather: weather,
+          pack: clone.pack
         })
       });
 
