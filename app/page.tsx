@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Clone, CloneFormData, JournalEntry } from '@/lib/types';
-import { hoursToRealMs, daysToRealMs, getCurrentMoment, getNextUpdateTime } from '@/lib/time';
+import { hoursToRealMs, daysToRealMs, getCurrentMoment, getNextUpdateTime, getTimeOfDay, getWeatherCondition } from '@/lib/time';
 import { saveClone, getClones, updateCloneStatus, deleteClone, saveJournalEntry, generateId, updateCloneJournalTime, clearJournalForClone, updateCloneTotalSpend } from '@/lib/storage';
 import CloneForm from '@/components/CloneForm';
 import CloneList from '@/components/CloneList';
@@ -122,6 +122,9 @@ export default function Home() {
     setIsGenerating(prev => new Set(prev).add(clone.id));
 
     try {
+      const timeInfo = getTimeOfDay(clone.arrival_time, Date.now());
+      const weather = getWeatherCondition();
+
       const response = await fetch('/api/generate-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,7 +136,9 @@ export default function Home() {
           preferences: clone.preferences,
           budget: clone.budget,
           moment: 'arrival',
-          isSummary: false
+          isSummary: false,
+          timeOfDay: timeInfo,
+          weather: weather
         })
       });
 
@@ -189,6 +194,8 @@ export default function Home() {
 
     try {
       const moment = getCurrentMoment(clone.arrival_time, now);
+      const timeInfo = getTimeOfDay(clone.arrival_time, now);
+      const weather = getWeatherCondition();
 
       const response = await fetch('/api/generate-update', {
         method: 'POST',
@@ -201,7 +208,9 @@ export default function Home() {
           preferences: clone.preferences,
           budget: clone.budget,
           moment,
-          isSummary: false
+          isSummary: false,
+          timeOfDay: timeInfo,
+          weather: weather
         })
       });
 

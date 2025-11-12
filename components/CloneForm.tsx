@@ -11,8 +11,8 @@ interface CloneFormProps {
 export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps) {
   const [name, setName] = useState('Dart');
   const [destination, setDestination] = useState('');
-  const [travelTimeHours, setTravelTimeHours] = useState(0.01);
-  const [activityDurationDays, setActivityDurationDays] = useState(3);
+  const [travelTimeHours, setTravelTimeHours] = useState(2);
+  const [activityDurationDays, setActivityDurationDays] = useState(1);
   const [preferences, setPreferences] = useState('');
   const [budget, setBudget] = useState<Budget>('medium');
 
@@ -24,13 +24,13 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
       return;
     }
 
-    if (travelTimeHours < 0.001 || travelTimeHours > 0.028) {
-      alert('Travel time must be between 0.001-0.028 hours (max 10 seconds real-time for testing)');
+    if (travelTimeHours < 0.5 || travelTimeHours > 24) {
+      alert('Travel time must be between 0.5-24 hours');
       return;
     }
 
-    if (activityDurationDays < 1 || activityDurationDays > 30) {
-      alert('Activity duration must be between 1-30 days');
+    if (activityDurationDays < 1 || activityDurationDays > 7) {
+      alert('Activity duration must be between 1-7 days');
       return;
     }
 
@@ -51,8 +51,8 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
     // Reset form
     setName('Dart');
     setDestination('');
-    setTravelTimeHours(0.01);
-    setActivityDurationDays(3);
+    setTravelTimeHours(2);
+    setActivityDurationDays(1);
     setPreferences('');
     setBudget('medium');
   };
@@ -95,16 +95,16 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Travel Time (hours)
             <span className="text-xs text-gray-500 ml-2">
-              10x faster: {travelTimeHours}h = {Math.round(travelTimeHours * 360)}s real-time (max 10s)
+              1600x faster: {travelTimeHours}h = {Math.round(travelTimeHours * 3600 / 1600)}s real-time
             </span>
           </label>
           <input
             type="number"
             value={travelTimeHours}
             onChange={(e) => setTravelTimeHours(Number(e.target.value))}
-            min={0.001}
-            max={0.028}
-            step={0.001}
+            min={0.5}
+            max={24}
+            step={0.5}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -113,7 +113,7 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Activity Duration (days)
             <span className="text-xs text-gray-500 ml-2">
-              10x faster: {activityDurationDays}d = {Math.round(activityDurationDays * 2.4)}h real-time
+              1600x faster: {activityDurationDays}d = {Math.round(activityDurationDays * 24 * 3600 / 1600)}s real-time
             </span>
           </label>
           <input
@@ -121,7 +121,7 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
             value={activityDurationDays}
             onChange={(e) => setActivityDurationDays(Number(e.target.value))}
             min={1}
-            max={30}
+            max={7}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>

@@ -4,7 +4,7 @@ import { Budget, JournalMoment } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, isSummary } = await request.json();
+    const { cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, isSummary, timeOfDay, weather } = await request.json();
 
     if (!cloneName || !destination) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Build context-aware prompt
     const prompt = isSummary
       ? buildSummaryPrompt(cloneName, destination, activityDurationDays, budget)
-      : buildPrompt(cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment);
+      : buildPrompt(cloneName, destination, travelTimeHours, activityDurationDays, preferences, budget, moment, timeOfDay, weather);
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
@@ -74,36 +74,64 @@ function buildPrompt(
   activityDurationDays: number,
   preferences: string,
   budget: Budget,
-  moment: JournalMoment
+  moment: JournalMoment,
+  timeOfDay?: any,
+  weather?: any
 ): string {
   // Budget-specific guidance
   const budgetGuidance = getBudgetGuidance(budget);
   const costRange = getCostRange(budget);
 
-  // Moment-specific context
-  const momentContext = getMomentContext(moment);
+  // Time and weather context
+  const hour = timeOfDay?.hour || 12;
+  const period = timeOfDay?.period || 'afternoon';
+  const weatherCondition = weather?.condition || 'clear';
+  const temperature = weather?.temp || 20;
+  const activityType = weather?.activityType || 'outdoor activities';
 
-  return `You're ${cloneName} in ${destination} on a ${activityDurationDays}-day trip with a ${budget} budget. Write a brief, practical travel tip entry.
+  // Build context based on time of day
+  let timeContext = '';
+  if (period === 'morning') {
+    timeContext = `It's ${hour}:00 in the morning. Time for breakfast, museums, or cultural sites.`;
+  } else if (period === 'afternoon') {
+    timeContext = `It's ${hour}:00 in the afternoon. Perfect for lunch, outdoor activities, or shopping.`;
+  } else if (period === 'evening') {
+    timeContext = `It's ${hour}:00 in the evening. Time for dinner, nightlife, or entertainment.`;
+  } else {
+    timeContext = `It's ${hour}:00 late at night. Night markets, bars, or clubs might be open.`;
+  }
 
-Your preferences: ${preferences || 'open to any experiences'}
+  return `You're ${cloneName} in ${destination} on day ${activityDurationDays} of your trip with a ${budget} budget.
 
-${budgetGuidance}
+Current situation:
+- Time: ${timeContext}
+- Weather: ${weatherCondition}, ${temperature}°C
+- Best for: ${activityType}
+- Your preferences: ${preferences || 'open to any experiences'}
+- ${budgetGuidance}
 
-Write a short journal update (2-3 sentences) about ${momentContext}.
+Write a brief journal update (2-3 sentences) like a human would spend their day.
 
 CRITICAL Requirements:
-1. Recommend a SPECIFIC real place with exact name and location (e.g., "Café Central, Herrengasse 14")
-2. Include the cost in EUROS (€) - ${costRange}
-3. Include travel time to get there (e.g., "20min by metro" or "15min walk from city center")
-4. Mention current weather if relevant (e.g., "sunny 18°C" or "rainy afternoon")
-5. Include public transport info if used (metro line, bus number, tram, walking route)
-6. Keep it brief and practical - focus on useful information, not jokes or personal anecdotes
+1. Choose an activity appropriate for the TIME OF DAY (${period}) and WEATHER (${weatherCondition})
+   - Morning (6am-12pm): breakfast spots, museums, cultural sites
+   - Afternoon (12pm-5pm): lunch, parks, shopping, outdoor sights
+   - Evening (5pm-10pm): dinner restaurants, bars, evening entertainment
+   - Night (10pm-6am): nightlife, late-night eateries, clubs
+2. Weather considerations:
+   - Sunny/clear: outdoor activities, parks, terraces
+   - Rainy/overcast: museums, cafes, indoor venues, covered markets
+   - Warm: air-conditioned spaces, shaded areas
+3. Include SPECIFIC real place with exact address (e.g., "La Boqueria Market, La Rambla 91")
+4. Include cost in EUROS (€) - ${costRange}
+5. Include travel time and transport (e.g., "15min on L3 metro" or "10min walk")
+6. Keep it brief and practical - NO jokes, just useful travel info
 
-Format: [Place name and location]. [Cost in €, travel time, transport method]. [Weather if relevant, brief practical tip].
+Format: [Place name and address]. [Cost €, travel time, transport]. [Weather note, practical tip].
 
-Example style: "Visited Schönbrunn Palace, Schönbrunner Schloßstraße 47. €18 entry, 25min on U4 metro from Karlsplatz. Sunny 16°C, arrive early to avoid crowds."
+Example: "Had breakfast at Café de Flore, 172 Boulevard Saint-Germain. €12, 20min on metro line 4 from hotel. Sunny 18°C, outdoor seating available."
 
-Write ONLY the journal entry. Be brief and informative.`;
+Write ONLY the journal entry matching the current time (${hour}:00, ${period}) and weather (${weatherCondition}).`;
 }
 
 function buildSummaryPrompt(

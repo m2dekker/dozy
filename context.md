@@ -1,15 +1,18 @@
 # CloneWander - Context & Documentation
 
 ## App Purpose
-CloneWander lets users send AI clones to destinations worldwide, set travel and activity times (accelerated 10x for testing), and receive personalized activity recommendations with expense tracking based on their preferences and budget. Users can dismiss clones to stop updates, and view deduplicated journals simulating a parallel life experience where clones journal their adventures in real-time.
+CloneWander lets users send AI clones to destinations worldwide, set travel and activity times (accelerated 1600x for ultra-fast testing - complete journey in ~1 minute), and receive personalized activity recommendations with expense tracking. Clones behave like real travelers with time-appropriate activities (morning breakfast, afternoon sightseeing, evening dining) that adapt to weather conditions. Users can dismiss clones to stop updates and view deduplicated journals simulating a realistic parallel life experience.
 
 ## Features
 - **Clone Creation**: Create up to 5 AI clones with custom destinations
-- **Time Acceleration**: 10x faster time (12-hour travel = 72 minutes real-time, 3-day activity = 7.2 hours)
+- **Ultra-Fast Testing**: 1600x acceleration (2-hour travel = ~4.5s, 1-day trip = ~54s real-time)
+- **Human-Like Daily Routines**: Clones behave like real travelers with time-appropriate activities
+- **Weather-Based Activities**: Activities adapt to current weather conditions (sunny = outdoor, rainy = museums)
+- **Time-of-Day Activities**: Morning breakfast/museums, afternoon lunch/parks, evening dinner/nightlife
 - **Personalized Recommendations**: Budget-aware suggestions (budget/medium/high/luxury)
 - **Preference-Based Content**: Tailor experiences to user interests (food, art, nature, etc.)
-- **Real-Time Journal**: Clones generate 2-3 updates daily during activity period with deduplication
-- **Expense Tracking**: Each journal update includes estimated costs, with running totals per clone and trip summaries
+- **Real-Time Journal**: Clones generate updates every 3-5 simulated hours with deduplication
+- **Expense Tracking**: Each journal update includes estimated costs in euros (€), with running totals
 - **Dismiss Clone**: Stop clone updates without deleting the clone or journal history
 - **Status Tracking**: Live updates on clone travel/activity progress
 - **Persistent Storage**: Supabase database with localStorage fallback
@@ -56,20 +59,23 @@ created_at: timestamp
 ```
 
 ## Time Calculation
-- **Acceleration Factor**: 10x
-- **Travel Time**: User input (hours) ÷ 10 = real minutes
-- **Activity Duration**: User input (days) × 24 hours ÷ 10 = real hours
-- **Update Frequency**: Every 2-4 hours (accelerated) = every 12-24 minutes real-time
+- **Acceleration Factor**: 1600x (for rapid testing - complete journey in ~1 minute)
+- **Travel Time**: User input (hours) ÷ 1600 = real seconds (2 hours = ~4.5s)
+- **Activity Duration**: User input (days) × 24 hours ÷ 1600 = real seconds (1 day = ~54s)
+- **Update Frequency**: Every 3-5 simulated hours = every few seconds real-time
+- **Total Journey**: Default 2h travel + 1 day activity = ~59 seconds real-time
 
 ## AI Prompt Strategy
-Clones generate vivid, first-person journal entries using Claude API:
-- Written in first person as if the clone is living a parallel life (not "as a clone")
-- Include specific real venue names with estimated costs
-- Match budget level (e.g., street food for budget, Michelin stars for luxury)
-- Incorporate user preferences naturally
-- Add relatable personal moments (spilled coffee, got lost, made a friend, etc.)
-- Avoid travel guide language—write spontaneously and authentically
-- Generate trip summaries at activity end with total estimated expenses
+Clones generate practical, human-like travel journal entries using Claude API:
+- **Time-Appropriate Activities**: Morning (breakfast, museums), afternoon (lunch, parks), evening (dinner, nightlife)
+- **Weather-Adaptive**: Sunny = outdoor activities, rainy = museums/cafes, warm = air-conditioned venues
+- **Realistic Daily Flow**: Activities match what humans actually do at specific times
+- **Specific Details**: Real venue names with exact addresses (e.g., "Café Central, Herrengasse 14")
+- **Practical Information**: Cost in euros (€), travel time, transport method (metro lines, walking)
+- **Budget Matching**: Street food for budget, Michelin stars for luxury
+- **Brief & Informative**: No jokes, just useful travel tips (2-3 sentences)
+- **Weather Reporting**: Current conditions and temperature included
+- **Trip Summaries**: Auto-generated at activity end with total expenses and best tips
 
 ## Future Enhancements (Not Implemented)
 - Integration with Google Places API for real venue data
@@ -80,6 +86,23 @@ Clones generate vivid, first-person journal entries using Claude API:
 - Weather data integration
 
 ## Update Log
+
+### 2025-11-12: Human-Like Daily Routines & Ultra-Fast Testing
+- **1600x Acceleration**: Complete journey now takes ~1 minute (2h travel + 1 day = 59s)
+- **Time-of-Day Activities**: Clones follow realistic daily schedules
+  - Morning (6am-12pm): Breakfast spots, museums, cultural sites
+  - Afternoon (12pm-5pm): Lunch, outdoor activities, shopping
+  - Evening (5pm-10pm): Dinner, nightlife, entertainment
+  - Night (10pm-6am): Bars, clubs, late-night eateries
+- **Weather-Based Behavior**: Activities adapt to weather conditions
+  - Sunny/clear: Outdoor activities, parks, walking tours
+  - Rainy/overcast: Museums, cafes, indoor attractions
+  - Warm: Air-conditioned venues, shaded areas
+- **Enhanced Prompts**: AI generates time and weather-appropriate activities
+- **New Time Functions**: `getTimeOfDay()` and `getWeatherCondition()` for realistic simulation
+- **Updated Defaults**: 2 hours travel, 1 day activity, clone name "Dart"
+- **Faster Updates**: Journal entries every 3-5 simulated hours
+- **Improved UX**: Time remaining displayed in seconds for fast testing
 
 ### 2025-11-11: Expense Tracking, Dismiss Feature & AI Improvements
 - **Expense Tracking**: Added cost estimation to each journal update based on budget level
