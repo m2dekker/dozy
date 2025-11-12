@@ -48,7 +48,7 @@ export default function JournalFeed({ entries, onClearClone }: JournalFeedProps)
                 <p className="text-sm text-gray-500">{group.entries.length} entries</p>
                 {group.totalSpend > 0 && (
                   <p className="text-sm font-medium text-green-600">
-                    💰 Total: ${group.totalSpend.toFixed(2)}
+                    💰 Total: €{group.totalSpend.toFixed(2)}
                   </p>
                 )}
               </div>
@@ -77,7 +77,7 @@ export default function JournalFeed({ entries, onClearClone }: JournalFeedProps)
                     </span>
                     {entry.cost > 0 && (
                       <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        ${entry.cost.toFixed(2)}
+                        €{entry.cost.toFixed(2)}
                       </span>
                     )}
                   </div>

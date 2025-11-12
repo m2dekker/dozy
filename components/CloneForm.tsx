@@ -9,9 +9,9 @@ interface CloneFormProps {
 }
 
 export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState('Dart');
   const [destination, setDestination] = useState('');
-  const [travelTimeHours, setTravelTimeHours] = useState(12);
+  const [travelTimeHours, setTravelTimeHours] = useState(0.01);
   const [activityDurationDays, setActivityDurationDays] = useState(3);
   const [preferences, setPreferences] = useState('');
   const [budget, setBudget] = useState<Budget>('medium');
@@ -24,8 +24,8 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
       return;
     }
 
-    if (travelTimeHours < 1 || travelTimeHours > 48) {
-      alert('Travel time must be between 1-48 hours');
+    if (travelTimeHours < 0.001 || travelTimeHours > 0.028) {
+      alert('Travel time must be between 0.001-0.028 hours (max 10 seconds real-time for testing)');
       return;
     }
 
@@ -49,9 +49,9 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
     });
 
     // Reset form
-    setName('');
+    setName('Dart');
     setDestination('');
-    setTravelTimeHours(12);
+    setTravelTimeHours(0.01);
     setActivityDurationDays(3);
     setPreferences('');
     setBudget('medium');
@@ -95,15 +95,16 @@ export default function CloneForm({ onSubmit, activeCloneCount }: CloneFormProps
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Travel Time (hours)
             <span className="text-xs text-gray-500 ml-2">
-              10x faster: {travelTimeHours}h = {Math.round(travelTimeHours * 6)}min real-time
+              10x faster: {travelTimeHours}h = {Math.round(travelTimeHours * 360)}s real-time (max 10s)
             </span>
           </label>
           <input
             type="number"
             value={travelTimeHours}
             onChange={(e) => setTravelTimeHours(Number(e.target.value))}
-            min={1}
-            max={48}
+            min={0.001}
+            max={0.028}
+            step={0.001}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>

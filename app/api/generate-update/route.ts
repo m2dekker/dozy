@@ -83,7 +83,7 @@ function buildPrompt(
   // Moment-specific context
   const momentContext = getMomentContext(moment);
 
-  return `You're ${cloneName}, an AI clone experiencing ${destination} for a ${activityDurationDays}-day trip with a ${budget} budget. This is YOUR parallel life—write like it's really happening to you.
+  return `You're ${cloneName} in ${destination} on a ${activityDurationDays}-day trip with a ${budget} budget. Write a brief, practical travel tip entry.
 
 Your preferences: ${preferences || 'open to any experiences'}
 
@@ -92,17 +92,18 @@ ${budgetGuidance}
 Write a short journal update (2-3 sentences) about ${momentContext}.
 
 CRITICAL Requirements:
-1. Recommend a SPECIFIC real place (e.g., "Pho 24 in District 1" not "a pho shop")
-2. Include an estimated cost for this activity/meal (${costRange})
-3. Add a unique, relatable personal moment (spilled something, got lost, made a friend, found a hidden spot, etc.)
-4. Write in FIRST PERSON like this is YOUR life happening right now
-5. Make it feel spontaneous and real, not like a travel guide
+1. Recommend a SPECIFIC real place with exact name and location (e.g., "Café Central, Herrengasse 14")
+2. Include the cost in EUROS (€) - ${costRange}
+3. Include travel time to get there (e.g., "20min by metro" or "15min walk from city center")
+4. Mention current weather if relevant (e.g., "sunny 18°C" or "rainy afternoon")
+5. Include public transport info if used (metro line, bus number, tram, walking route)
+6. Keep it brief and practical - focus on useful information, not jokes or personal anecdotes
 
-Format: [Your experience with specific place and cost]. [Personal moment/detail].
+Format: [Place name and location]. [Cost in €, travel time, transport method]. [Weather if relevant, brief practical tip].
 
-Example style: "Grabbed ramen at Ichiran in Shibuya for ¥1200—slurped so loud the guy next to me laughed. Worth the embarrassment for those noodles."
+Example style: "Visited Schönbrunn Palace, Schönbrunner Schloßstraße 47. €18 entry, 25min on U4 metro from Karlsplatz. Sunny 16°C, arrive early to avoid crowds."
 
-Write ONLY the journal entry. No preamble, no "As a clone" - just write like it's YOUR life.`;
+Write ONLY the journal entry. Be brief and informative.`;
 }
 
 function buildSummaryPrompt(
@@ -115,15 +116,15 @@ function buildSummaryPrompt(
 
   return `You're ${cloneName} wrapping up a ${activityDurationDays}-day trip to ${destination} on a ${budget} budget.
 
-Write a brief trip summary (2-3 sentences) reflecting on the experience.
+Write a brief trip summary (2-3 sentences) with practical overview.
 
 Requirements:
-1. Mention the total estimated spend (${costRange} for ${activityDurationDays} days)
-2. Highlight one memorable moment
-3. Write in first person, conversational tone
-4. Make it feel personal and real
+1. Mention the total estimated spend in euros (${costRange} for ${activityDurationDays} days)
+2. Highlight the most useful tip or discovery
+3. Keep it brief and practical
+4. Include overall transport or weather notes if relevant
 
-Example: "Just wrapped up 3 days in Tokyo—spent around ¥45,000 total. The highlight? Getting lost in Akihabara and ending up at a tiny arcade bar. Ready to come back already."
+Example: "Completed 3 days in Vienna—spent around €180 total. Best discovery: 24-hour metro pass (€8) saved a lot vs single tickets. Weather was mild 15-18°C, perfect for walking."
 
 Write ONLY the summary, no preamble.`;
 }
@@ -131,13 +132,13 @@ Write ONLY the summary, no preamble.`;
 function getBudgetGuidance(budget: Budget): string {
   switch (budget) {
     case 'budget':
-      return 'Budget mode: Street food, local markets, free attractions, public transport. Look for authentic local experiences $5-20 per activity.';
+      return 'Budget mode: Street food, local markets, free attractions, public transport. €5-20 per activity.';
     case 'medium':
-      return 'Medium budget: Casual restaurants, paid attractions, occasional taxi. Mix of popular spots and hidden gems, $20-50 per activity.';
+      return 'Medium budget: Casual restaurants, paid attractions, occasional taxi. €20-50 per activity.';
     case 'high':
-      return 'High budget: Fine dining occasionally, nice experiences, private tours. Quality focus, $50-150 per activity.';
+      return 'High budget: Fine dining occasionally, nice experiences, private tours. €50-150 per activity.';
     case 'luxury':
-      return 'Luxury budget: Michelin-starred restaurants, exclusive experiences, premium everything. The absolute best, $150+ per activity.';
+      return 'Luxury budget: Michelin-starred restaurants, exclusive experiences, premium everything. €150+ per activity.';
     default:
       return 'Flexible budget.';
   }
@@ -146,13 +147,13 @@ function getBudgetGuidance(budget: Budget): string {
 function getCostRange(budget: Budget): string {
   switch (budget) {
     case 'budget':
-      return 'around $5-20 / €5-20 / ¥500-2000';
+      return '€5-20';
     case 'medium':
-      return 'around $20-50 / €20-50 / ¥2000-5000';
+      return '€20-50';
     case 'high':
-      return 'around $50-150 / €50-150 / ¥5000-15000';
+      return '€50-150';
     case 'luxury':
-      return 'around $150+ / €150+ / ¥15000+';
+      return '€150+';
     default:
       return 'varies';
   }
@@ -161,13 +162,13 @@ function getCostRange(budget: Budget): string {
 function getTotalCostRange(budget: Budget, days: number): string {
   switch (budget) {
     case 'budget':
-      return `$${30 * days}-${60 * days}`;
+      return `€${30 * days}-${60 * days}`;
     case 'medium':
-      return `$${60 * days}-${150 * days}`;
+      return `€${60 * days}-${150 * days}`;
     case 'high':
-      return `$${150 * days}-${300 * days}`;
+      return `€${150 * days}-${300 * days}`;
     case 'luxury':
-      return `$${300 * days}+`;
+      return `€${300 * days}+`;
     default:
       return 'varies';
   }
@@ -176,13 +177,13 @@ function getTotalCostRange(budget: Budget, days: number): string {
 function getMomentContext(moment: JournalMoment): string {
   switch (moment) {
     case 'arrival':
-      return 'your arrival and first impressions. What did you discover right away? Where did you go first?';
+      return 'a place or activity immediately after arrival. Include transport from airport/station to this location.';
     case 'mid-day':
-      return 'what you\'re doing mid-day. What activity or place are you exploring right now?';
+      return 'a mid-day activity or location. Include how to get there and current conditions.';
     case 'evening':
-      return 'how you\'re spending the evening. Where are you dining or what evening activity did you discover?';
+      return 'an evening activity, restaurant, or location. Include transport info and timing.';
     default:
-      return 'your current experience';
+      return 'your current activity';
   }
 }
 

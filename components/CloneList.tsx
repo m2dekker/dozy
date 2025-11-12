@@ -78,7 +78,7 @@ export default function CloneList({ clones, currentTime, onDelete, onDismiss }: 
               )}
               {clone.total_spend > 0 && (
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  💰 ${clone.total_spend.toFixed(0)} spent
+                  💰 €{clone.total_spend.toFixed(0)} spent
                 </span>
               )}
             </div>
@@ -112,7 +112,7 @@ export default function CloneList({ clones, currentTime, onDelete, onDismiss }: 
             {clone.status === 'finished' && clone.total_spend > 0 && (
               <div className="mt-3 bg-green-50 border-l-4 border-green-500 p-3 rounded">
                 <p className="text-sm text-green-800">
-                  ✅ Trip complete! Total estimated spend: ${clone.total_spend.toFixed(2)}
+                  ✅ Trip complete! Total estimated spend: €{clone.total_spend.toFixed(2)}
                 </p>
               </div>
             )}
