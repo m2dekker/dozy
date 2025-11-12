@@ -6,9 +6,11 @@ import { formatTimestamp } from '@/lib/time';
 interface JournalFeedProps {
   entries: JournalEntry[];
   onClearClone?: (cloneId: string, cloneName: string) => void;
+  selectedEntries?: Set<string>;
+  onSelectEntry?: (entryId: string) => void;
 }
 
-export default function JournalFeed({ entries, onClearClone }: JournalFeedProps) {
+export default function JournalFeed({ entries, onClearClone, selectedEntries, onSelectEntry }: JournalFeedProps) {
   if (entries.length === 0) {
     return (
       <div className="bg-gray-50 rounded-lg p-12 text-center">
@@ -67,10 +69,18 @@ export default function JournalFeed({ entries, onClearClone }: JournalFeedProps)
             {group.entries.map((entry) => (
               <div
                 key={entry.id}
-                className="border-l-4 border-purple-500 pl-4 py-2 hover:bg-purple-50 transition-colors rounded-r"
+                className={`border-l-4 border-purple-500 pl-4 py-2 hover:bg-purple-50 transition-colors rounded-r ${selectedEntries?.has(entry.id) ? 'bg-purple-50' : ''}`}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2 flex-wrap flex-1">
+                    {onSelectEntry && (
+                      <input
+                        type="checkbox"
+                        checked={selectedEntries?.has(entry.id) || false}
+                        onChange={() => onSelectEntry(entry.id)}
+                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
+                      />
+                    )}
                     <span className="text-2xl">{getMomentEmoji(entry.moment)}</span>
                     <span className="font-semibold text-gray-800 capitalize">
                       {entry.moment.replace('-', ' ')}
