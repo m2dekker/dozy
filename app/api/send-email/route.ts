@@ -59,15 +59,11 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('SendGrid error:', error);
-
-    // Log to console as fallback
-    const { email, entries } = await request.json();
-    console.log('📧 Fallback: Email would be sent to:', email);
-    console.log('Journal entries:', entries);
+    console.error('Error details:', error.response?.body || error);
 
     return NextResponse.json({
       error: error.message || 'Failed to send email',
-      fallback: 'Email logged to console',
+      details: error.response?.body?.errors?.[0]?.message || 'Unknown error',
       success: false
     }, { status: 500 });
   }

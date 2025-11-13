@@ -120,13 +120,14 @@ export default function JournalPage() {
       } else {
         setEmailResult({
           success: false,
-          message: data.error || 'Failed to send email. Please try again.'
+          message: data.error || data.details || 'Failed to send email. Please try again.'
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Email send error:', error);
       setEmailResult({
         success: false,
-        message: 'Network error. Please check your connection and try again.'
+        message: error.message || 'Network error. Please check your connection and try again.'
       });
     } finally {
       setSending(false);
