@@ -60,12 +60,31 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('SendGrid error:', error);
     console.error('Error details:', error.response?.body || error);
+    console.error('Status code:', error.code);
+
+    // Extract detailed error message from SendGrid
+    let errorMessage = 'Failed to send email';
+    let errorDetails = '';
+
+    if (error.code === 403) {
+      errorMessage = 'SendGrid Permission Denied (403)';
+      errorDetails = 'Your sender email may not be verified. Please verify your sender identity in SendGrid Settings → Sender Authentication.';
+    } else if (error.code === 401) {
+      errorMessage = 'SendGrid Authentication Failed (401)';
+      errorDetails = 'Invalid API key. Please check your SENDGRID_API_KEY environment variable.';
+    } else if (error.response?.body?.errors) {
+      errorMessage = error.response.body.errors[0]?.message || errorMessage;
+      errorDetails = error.response.body.errors[0]?.field
+        ? `Field: ${error.response.body.errors[0].field}`
+        : '';
+    }
 
     return NextResponse.json({
-      error: error.message || 'Failed to send email',
-      details: error.response?.body?.errors?.[0]?.message || 'Unknown error',
+      error: errorMessage,
+      details: errorDetails || error.message,
+      code: error.code,
       success: false
-    }, { status: 500 });
+    }, { status: error.code || 500 });
   }
 }
 
