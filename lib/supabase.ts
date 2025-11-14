@@ -50,6 +50,10 @@ export async function createClone(clone: Omit<Clone, 'id' | 'createdAt'>): Promi
     return data;
   } else {
     // localStorage fallback
+    if (!isLocalStorageAvailable()) {
+      throw new Error('localStorage is not available. You may be in private/incognito mode. Please enable storage or set up Supabase.');
+    }
+
     try {
       const clones = getLocalClones();
       clones.push(newClone);
@@ -57,7 +61,7 @@ export async function createClone(clone: Omit<Clone, 'id' | 'createdAt'>): Promi
       return newClone;
     } catch (storageError) {
       console.error('localStorage error:', storageError);
-      throw new Error('Unable to save data. Please enable cookies/storage or set up Supabase.');
+      throw new Error('Unable to save data. Error: ' + (storageError instanceof Error ? storageError.message : String(storageError)));
     }
   }
 }
@@ -179,16 +183,41 @@ export async function getJournalEntries(cloneId?: string): Promise<JournalEntry[
 
 // ============ LocalStorage Helpers ============
 
+/**
+ * Check if localStorage is available
+ */
+function isLocalStorageAvailable(): boolean {
+  try {
+    if (typeof window === 'undefined') return false;
+    const test = '__storage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function getLocalClones(): Clone[] {
-  if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem(CLONES_KEY);
-  return data ? JSON.parse(data) : [];
+  if (!isLocalStorageAvailable()) return [];
+  try {
+    const data = localStorage.getItem(CLONES_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error('Error reading clones from localStorage:', e);
+    return [];
+  }
 }
 
 function getLocalJournals(): JournalEntry[] {
-  if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem(JOURNALS_KEY);
-  return data ? JSON.parse(data) : [];
+  if (!isLocalStorageAvailable()) return [];
+  try {
+    const data = localStorage.getItem(JOURNALS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error('Error reading journals from localStorage:', e);
+    return [];
+  }
 }
 
 // Export flag for UI to show which storage is being used
