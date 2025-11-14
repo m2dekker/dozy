@@ -50,10 +50,15 @@ export async function createClone(clone: Omit<Clone, 'id' | 'createdAt'>): Promi
     return data;
   } else {
     // localStorage fallback
-    const clones = getLocalClones();
-    clones.push(newClone);
-    localStorage.setItem(CLONES_KEY, JSON.stringify(clones));
-    return newClone;
+    try {
+      const clones = getLocalClones();
+      clones.push(newClone);
+      localStorage.setItem(CLONES_KEY, JSON.stringify(clones));
+      return newClone;
+    } catch (storageError) {
+      console.error('localStorage error:', storageError);
+      throw new Error('Unable to save data. Please enable cookies/storage or set up Supabase.');
+    }
   }
 }
 
@@ -102,13 +107,18 @@ export async function updateClone(
     if (error) throw error;
     return data;
   } else {
-    const clones = getLocalClones();
-    const index = clones.findIndex((c) => c.id === id);
-    if (index === -1) return null;
+    try {
+      const clones = getLocalClones();
+      const index = clones.findIndex((c) => c.id === id);
+      if (index === -1) return null;
 
-    clones[index] = { ...clones[index], ...updates };
-    localStorage.setItem(CLONES_KEY, JSON.stringify(clones));
-    return clones[index];
+      clones[index] = { ...clones[index], ...updates };
+      localStorage.setItem(CLONES_KEY, JSON.stringify(clones));
+      return clones[index];
+    } catch (storageError) {
+      console.error('localStorage error:', storageError);
+      throw new Error('Unable to update clone data. Please enable cookies/storage or set up Supabase.');
+    }
   }
 }
 
@@ -132,10 +142,15 @@ export async function createJournalEntry(
     if (error) throw error;
     return data;
   } else {
-    const journals = getLocalJournals();
-    journals.push(newEntry);
-    localStorage.setItem(JOURNALS_KEY, JSON.stringify(journals));
-    return newEntry;
+    try {
+      const journals = getLocalJournals();
+      journals.push(newEntry);
+      localStorage.setItem(JOURNALS_KEY, JSON.stringify(journals));
+      return newEntry;
+    } catch (storageError) {
+      console.error('localStorage error:', storageError);
+      throw new Error('Unable to save journal entry. Please enable cookies/storage or set up Supabase.');
+    }
   }
 }
 

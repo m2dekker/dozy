@@ -72,8 +72,9 @@ export default function CloneForm({ onCloneCreated, activeCloneCount }: CloneFor
       setSelectedCategories([]);
       onCloneCreated();
     } catch (err) {
-      setError('Failed to create clone. Please try again.');
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create clone. Please try again.';
+      setError(errorMessage);
+      console.error('Clone creation error:', err);
     } finally {
       setIsSubmitting(false);
     }
