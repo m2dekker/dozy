@@ -149,7 +149,7 @@ export default function Home() {
 
   const generateFinalSummary = async (clone: Clone, entries: any[]) => {
     try {
-      const locations = [...new Set(entries.map((e) => e.route).filter(Boolean))];
+      const locations = Array.from(new Set(entries.map((e) => e.route).filter(Boolean)));
 
       const response = await fetch('/api/generate-update', {
         method: 'POST',
