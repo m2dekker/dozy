@@ -16,6 +16,17 @@ const CLONES_KEY = 'clonewander_clones';
 const JOURNALS_KEY = 'clonewander_journals';
 
 /**
+ * Generate a simple UUID that works in all environments
+ */
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
  * Storage abstraction layer - uses Supabase if available, otherwise localStorage
  */
 
@@ -24,7 +35,7 @@ const JOURNALS_KEY = 'clonewander_journals';
 export async function createClone(clone: Omit<Clone, 'id' | 'createdAt'>): Promise<Clone> {
   const newClone: Clone = {
     ...clone,
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     createdAt: new Date().toISOString(),
   };
 
@@ -108,7 +119,7 @@ export async function createJournalEntry(
 ): Promise<JournalEntry> {
   const newEntry: JournalEntry = {
     ...entry,
-    id: crypto.randomUUID(),
+    id: generateUUID(),
   };
 
   if (USE_SUPABASE) {
