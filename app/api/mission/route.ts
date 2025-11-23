@@ -79,13 +79,27 @@ IMPORTANT:
     // Parse JSON response
     let missionData;
     try {
-      // Extract JSON from response (handle potential markdown code blocks)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON found in response');
-      missionData = JSON.parse(jsonMatch[0]);
+      // Clean response: remove markdown code blocks
+      let cleanedText = responseText
+        .replace(/```json\n?/gi, '')
+        .replace(/```\n?/g, '')
+        .trim();
+
+      // Try to find JSON object
+      const startIndex = cleanedText.indexOf('{');
+      const endIndex = cleanedText.lastIndexOf('}');
+
+      if (startIndex === -1 || endIndex === -1) {
+        console.error('No JSON braces found in:', cleanedText.substring(0, 200));
+        throw new Error('No JSON found in response');
+      }
+
+      const jsonString = cleanedText.substring(startIndex, endIndex + 1);
+      missionData = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      return NextResponse.json({ error: 'Failed to parse mission data' }, { status: 500 });
+      console.error('Response text:', responseText.substring(0, 500));
+      return NextResponse.json({ error: 'Failed to parse mission data. Please try again.' }, { status: 500 });
     }
 
     const mission: Mission = {
